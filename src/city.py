@@ -69,5 +69,5 @@ class City:
             # TODO: find out how to compute the intrinsic delays gamma from this
         
 if __name__ == "__main__":
-    city = City(50, 50, 5, 5, 10)
+    city = City(50, 50, 5, 5, 10, 5)
     print(city.end_times)  # 55
