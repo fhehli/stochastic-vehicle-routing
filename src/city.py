@@ -1,4 +1,5 @@
 import numpy as np
+from constants import *
 
 class City:
     def __init__(self, height: int, width: int, n_districts_y: int, n_districts_x: int, n_tasks: int, n_scenarios: int):
@@ -9,7 +10,20 @@ class City:
         self.n_districts = n_districts_x * n_districts_y
         self.n_tasks = n_tasks
         self.n_scenarios = n_scenarios
-        self.sample_tasks(60.0 * 6, 60.0 * 20, 1.2, 1.6)
+
+        self.positions_start = None
+        self.positions_end = None
+        self.start_times = None
+        self.end_times = None
+        self.scenario_start_times = None # n_tasks x n_scenarios
+        self.scenario_end_times = None   # n_tasks x n_scenarios
+
+        self.sample_tasks(start_low=TASK_START_TIME_LOW, 
+                          start_high=TASK_START_TIME_HI, 
+                          multiplier_low=TASK_DISTANCE_MULTIPLIER_LOW, 
+                          multiplier_high=TASK_DISTANCE_MULTIPLIER_HI)
+        
+        self.sample_scenarios()
 
     def position_valid(self, x: float, y: float) -> bool:
         # Returns True if the position (x, y) is within the city boundaries
@@ -41,33 +55,83 @@ class City:
         self.start_times = start_times
         self.end_times = end_times
 
+    # computes the congestion and inter-congestion for every district of the city
     def sample_congestion(self):
-        mu = np.random.uniform(1, 3, 1)
-        sigma = np.random.uniform(.4, .6, 1)
-        # zeta^district
-        congestion = np.random.lognormal(mu, sigma, size=(self.n_districts, 24))
+        # zeta^district: size n_districts x 24
+        hrs = N_HOURS
+        mu = np.random.uniform(INTRA_DISTRICT_CONGESTION_MU_UNIF_LOW, 
+                               INTRA_DISTRICT_CONGESTION_MU_UNIF_HI, 
+                               1)
+        sigma = np.random.uniform(INTRA_DISTRICT_CONGESTION_SIGMA_UNIF_LO, 
+                                  INTRA_DISTRICT_CONGESTION_SIGMA_UNIF_HI, 
+                                  1)
+        
+        congestion = np.random.lognormal(mu, sigma, size=(self.n_districts, hrs))
         for i in range(self.n_districts):
             for j in range(1, 24):
                 congestion[i, j] = congestion[i, j - 1] / 2 + congestion[i, j]
 
-        mu = 0.02
-        sigma = 0.05
+        # zeta^inter: size 24
+        mu = INTER_DISTRICT_CONGESTION_MU
+        sigma = INTER_DISTRICT_CONGESTION_SIGMA
+        I = np.random.lognormal(mu, sigma, size=1)[0] # numpy 1.26.4
 
-        I = np.random.lognormal(mu, sigma, size=1)
-        # zeta^inter
-        inter_congestion = np.zeros(24)
+        inter_congestion = np.zeros(hrs)
         inter_congestion[0] = I
-        for i in range(1, 24):
+        for i in range(1, hrs):
             inter_congestion[i] = (inter_congestion[i - 1] + 0.1) * I
 
         return congestion, inter_congestion    
 
     def sample_scenarios(self):
-        for i in range(self.n_scenarios):
-            congestion, inter_congestion = self.sample_congestion()
-            # TODO: compute perturbed start and end times as in https://batyleo.github.io/StochasticVehicleScheduling.jl/stable/dataset/#City
-            # TODO: find out how to compute the intrinsic delays gamma from this
+        start_districts = np.array([self.get_district(x, y) for x, y in self.positions_start])
+        end_districts = np.array([self.get_district(x, y) for x, y in self.positions_end])
+        start_times = self.start_times
+        end_times = self.end_times
+
+        # for every task, sample a delay for every scenario
+        scenario_start_random_delay = np.random.lognormal(SCENARIO_START_ZERO_UNIFORM_LOW, 
+                                                         SCENARIO_START_ZERO_UNIFORM_HI, 
+                                                         self.n_scenarios)
+        self.scenario_start_times = np.stack([np.repeat(self.start_times[t], self.n_scenarios) + scenario_start_random_delay
+                                              for t in range(self.n_tasks)])
+        self.scenario_end_times = np.zeros((self.n_tasks, self.n_scenarios))
+
+        # sample congestion and inter-congestion for every scenario
+        for j in range(self.n_tasks):
+            for i in range(self.n_scenarios):
+                congestion, inter_congestion = self.sample_congestion()
+                z1 = self.scenario_start_times[j, i]
+                start_district_delay = congestion[start_districts[j], self.get_hour(self.scenario_start_times[j, i])] 
+                z2 = z1 + start_district_delay
+                z3 = z2 + end_times[i] - start_times[i] + inter_congestion[self.get_hour(z2)]
+                end_district_delay = congestion[end_districts[j], self.get_hour(z3)]
+                self.scenario_end_times[j, i] = z3 + end_district_delay
+
+    # TODO
+    def compute_features():
+        pass
+
+    # TODO
+    def compute_slacks():
+        pass    
+
+    @staticmethod
+    def get_hour(minutes: float) -> int:
+        assert minutes >= 0, f"Minutes must be positive, got {minutes}"
+        assert minutes < N_HOURS * 60, f"Minutes must be less than {N_HOURS * 60}, got {minutes}"
+        return int(minutes // 60)
         
+
 if __name__ == "__main__":
-    city = City(50, 50, 5, 5, 10, 5)
-    print(city.end_times)  # 55
+    city = City(CITY_HEIGHT_MINUTES, 
+                CITY_WIDTH_MINUTES, 
+                N_DISTRICTS_X, 
+                N_DISTRICTS_Y, 
+                N_TASKS, 
+                N_SCENARIOS)
+    print(city.start_times)
+    print(city.end_times)
+    print([t for t in np.mean(city.scenario_start_times, axis=1)]) 
+    print([t for t in np.mean(city.scenario_end_times, axis=1)]) 
+    assert np.all([np.all(t_end > t_start) for (t_end, t_start) in zip(city.scenario_end_times, city.scenario_start_times)])
