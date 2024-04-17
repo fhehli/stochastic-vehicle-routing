@@ -124,7 +124,6 @@ class City:
         # Returns the district number of the district at position (x, y)
         return int(y / self.height * self.n_districts_y) * self.n_districts_x + int(x / self.width * self.n_districts_x)
 
-    # TODO: add start and end tasks
     def sample_tasks(self, start_low: float, start_high: float, multiplier_low: float, multiplier_high: float):
         x_start = np.random.uniform(0, self.width, self.n_tasks)
         y_start = np.random.uniform(0, self.height, self.n_tasks)
@@ -372,7 +371,6 @@ if __name__ == "__main__":
     city.create_graph()
     print("build graph done")
     
-    # TODO do not run this yet
     print("compute features")
     feats = city.compute_features()
     print("compute features done")
