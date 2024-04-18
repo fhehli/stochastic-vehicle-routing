@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from deterministic import VSPSolver
+from VSPSolver import VSPSolver
 
 
 class FenchelYoungGLM(nn.Module):
