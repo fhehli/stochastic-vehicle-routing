@@ -9,7 +9,7 @@ jobs:
     - uses: actions/setup-python@v5
     - uses: jpetrucciani/ruff-check@main
       with:
-        options: --fix . --config=.github/workflows/.ruff.toml
+        flags: --fix . --config=.github/workflows/.ruff.toml
     - uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: 'style fixes by ruff'
