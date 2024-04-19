@@ -7,10 +7,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
-    - uses: jpetrucciani/ruff-check@main
+    - uses: davidslusser/actions_python_ruff@v1.0.1
       with:
-        args: --fix . --config=.github/workflows/.ruff.toml
-        python-version: 3.12
+        options: "--fix . --config=.github/workflows/.ruff.toml"
+        pip_install_command: "pip install -e .[dev]"
+        python_version: "3.12"
     - uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: 'style fixes by ruff'
