@@ -169,11 +169,12 @@ class City:
         # zeta^inter: size 24
         mu = INTER_DISTRICT_CONGESTION_MU
         sigma = INTER_DISTRICT_CONGESTION_SIGMA
+        J = np.random.lognormal(mu, sigma, size=1)[0]  # numpy 1.26.4
 
         inter_congestion = np.zeros(hrs)
-        inter_congestion[0] = np.random.lognormal(mu, sigma, size=1)[0]  # numpy 1.26.4
+        inter_congestion[0] = J
         for i in range(1, hrs):
-            inter_congestion[i] = (inter_congestion[i - 1] + 0.1) * I
+            inter_congestion[i] = (inter_congestion[i - 1] + 0.1) * J
 
         return congestion, inter_congestion
 
