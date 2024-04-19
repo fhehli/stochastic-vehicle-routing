@@ -8,8 +8,8 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
     - run: pip install ruff
-    - run: ruff check . --config=.github/workflows/.ruff.toml
-    - run: ruff fix . --config=.github/workflows/.ruff.toml
+    - run: ruff check --fix . --config=.github/workflows/.ruff.toml
+    - run: ruff format . --config=.github/workflows/.ruff.toml
     - uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: 'style fixes by ruff'
