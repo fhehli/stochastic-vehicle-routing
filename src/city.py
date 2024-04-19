@@ -48,6 +48,7 @@ class SimpleDirectedGraph:
             raise NameError(f"Cannot add vertex with name {v.name}, name already exists")
         else:
             self.vertices[v.name] = v
+            print(f"add vertex {v.name}")
         
     def add_edge(self, e: Edge):
         if not (self.__check_exists_vertex_name(e.from_vertex.name) or self.__check_exists_vertex_name(e.to_vertex.name)):
@@ -183,7 +184,7 @@ class City:
 
         # for every task, sample a delay for every scenario
         # is 0 by default using low = -inf and high = 1
-        # TODO: should this be constant for all tasks? Also, shouldn't this be zero for the dummy tasks?
+        # scenario_start_random_delay always returns 0 (useful for type stability reasons)
         scenario_start_random_delay = np.random.lognormal(SCENARIO_START_ZERO_UNIFORM_LOW, 
                                                          SCENARIO_START_ZERO_UNIFORM_HI, 
                                                          self.n_scenarios)
@@ -267,7 +268,7 @@ class City:
         return result
             
 
-    # computes the slack in minutes for features
+    # computes the slack in minutes for features (for one edge)
     def compute_slacks_for_features(self, from_node_id: int, to_node_id: int) -> np.ndarray:
         # assumes that the node names are directly convertible to ints
         assert self.graph is not None , "cannot compute features with empty graph"
@@ -281,7 +282,7 @@ class City:
         
 
 
-    # TODO computes the slacks in minutes for all instances
+    # TODO computes the slacks in minutes for an instance of the VSP problem (i.e. for all edges)
     def compute_slacks_for_instance(self) -> np.ndarray:
         # assumes that vertex names can be directly converted into ints
         G = self.graph
