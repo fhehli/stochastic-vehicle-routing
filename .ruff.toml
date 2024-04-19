@@ -1,2 +1,5 @@
 line-length = 120
-exclude = ["scr/perturbations"]
+exclude = ["src/perturbations/*"]
+
+[lint]
+ignore = ["F405", "F403"]
