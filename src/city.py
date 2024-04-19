@@ -169,10 +169,9 @@ class City:
         # zeta^inter: size 24
         mu = INTER_DISTRICT_CONGESTION_MU
         sigma = INTER_DISTRICT_CONGESTION_SIGMA
-        I = np.random.lognormal(mu, sigma, size=1)[0]  # numpy 1.26.4
 
         inter_congestion = np.zeros(hrs)
-        inter_congestion[0] = I
+        inter_congestion[0] = np.random.lognormal(mu, sigma, size=1)[0]  # numpy 1.26.4
         for i in range(1, hrs):
             inter_congestion[i] = (inter_congestion[i - 1] + 0.1) * I
 
@@ -321,9 +320,9 @@ class City:
                 for e in E
             ]
         )
-        I = np.array([int(e.from_node.name) for e in E])
-        J = np.array([int(e.to_node.name) for e in E])
-        return scipy.sparse(I, J, slack_list)  # TODO: check this
+        J = np.array([int(e.from_node.name) for e in E])
+        K = np.array([int(e.to_node.name) for e in E])
+        return scipy.sparse(J, K, slack_list)  # TODO: check this
 
     # Returns a matrix of features of size (20, nb_edges)
     def compute_features(self) -> np.ndarray:
