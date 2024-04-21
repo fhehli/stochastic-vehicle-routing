@@ -69,7 +69,7 @@ class SimpleDirectedGraph:
                     raise NameError(f"cannot add edge with name {e.name}, name already exists")
                 if v.from_vertex.name == e.from_vertex.name and v.to_vertex.name == e.to_vertex.name:
                     raise NameError(
-                        f"cannot add edge, duplicate edge with same from and to vertex with name {k} al;ready exists"
+                        f"cannot add edge, duplicate edge with same from and to vertex with name {k} already exists"
                     )
             self.edges[e.name] = e
             print(f"add edge {e.from_vertex.name} -> {e.to_vertex.name}")
