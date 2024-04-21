@@ -39,4 +39,6 @@ class VSPSolver:
         # Optimize model
         self.model.optimize()
 
-        return self.model.getVars()  # TODO: maybe need to extract values
+        # TODO: maybe need to extract values (solution stored in `var.X`)
+        # TODO: what do we return in case when no solution is found
+        return self.model.getVars()
