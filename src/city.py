@@ -8,6 +8,9 @@ class Vertex:
     def __init__(self, name, **kwargs) -> None:
         self.name = str(name)
 
+    def __eq__(self, other):
+        return self.name == other.name
+
 
 class Edge:
     def __init__(self, from_vertex: Vertex, to_vertex: Vertex, **kwargs) -> None:
