@@ -16,6 +16,9 @@ class VSPSolver:
         for edge in self.city.graph.get_edges():
             self.model.addVar(vtype=GRB.BINARY, name=edge.name)
 
+        # The model is updated lazily (https://support.gurobi.com/hc/en-us/articles/19459921918737-What-does-Awaiting-Model-Update-mean)
+        self.model.update()
+
         # Add constraints
         for v in list(city.graph.get_vertices())[:-2]:  # We do not need theses constraints for the nodes `o` and `d`
             # Flow Polytope
@@ -28,7 +31,6 @@ class VSPSolver:
                 quicksum(self.model.getVarByName(e.name) for e in city.graph.get_outgoing_edges(v)) == 1
             )
 
-        # The model is updated lazily (https://support.gurobi.com/hc/en-us/articles/19459921918737-What-does-Awaiting-Model-Update-mean)
         # Update manually
         self.model.update()
 
