@@ -39,6 +39,5 @@ class VSPSolver:
         # Optimize model
         self.model.optimize()
 
-        # TODO: maybe need to extract values (solution stored in `var.X`)
-        # TODO: what do we return in case when no solution is found
-        return self.model.getVars()
+        # TODO: what should we return, the cost (theta*result) or the result?
+        return [var.X for var in self.model.getVars()]
