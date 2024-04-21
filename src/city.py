@@ -30,16 +30,16 @@ class SimpleDirectedGraph:
 
     def get_vertices(self):
         return self.vertices.values()
-    
+
     def get_edges(self):
         return self.edges.values()
 
     def get_num_vertices(self) -> int:
         return len(self.vertices)
-    
+
     def get_num_edges(self) -> int:
         return len(self.edges)
-    
+
     def get_vertex_by_name(self, name: str) -> Vertex:
         if name in self.vertices:
             return self.vertices[name]
@@ -58,19 +58,23 @@ class SimpleDirectedGraph:
         else:
             self.vertices[v.name] = v
             print(f"add vertex {v.name}")
-        
+
     def add_edge(self, e: Edge):
-        if not (self.__check_exists_vertex_name(e.from_vertex.name) or self.__check_exists_vertex_name(e.to_vertex.name)):
+        if not (
+            self.__check_exists_vertex_name(e.from_vertex.name) or self.__check_exists_vertex_name(e.to_vertex.name)
+        ):
             raise ValueError(f"cannot add edge with name {e.name}, at least one of the endpoints does not exist")
         if len(self.edges) == 0:
             self.edges[e.name] = e
             self.__validity_check(self.vertices, self.edges)
         else:
-            for (k, v) in self.edges.items():
+            for k, v in self.edges.items():
                 if e.name == k:
                     raise NameError(f"cannot add edge with name {e.name}, name already exists")
                 if v.from_vertex.name == e.from_vertex.name and v.to_vertex.name == e.to_vertex.name:
-                    raise NameError(f"cannot add edge, duplicate edge with same from and to vertex with name {k} al;ready exists")
+                    raise NameError(
+                        f"cannot add edge, duplicate edge with same from and to vertex with name {k} al;ready exists"
+                    )
             self.edges[e.name] = e
             print(f"add edge {e.from_vertex.name} -> {e.to_vertex.name}")
 
@@ -85,12 +89,12 @@ class SimpleDirectedGraph:
             return True
         else:
             return name in self.edges
-    
-    def __validity_check(self, vertices: dict[Vertex], edges: dict[Edge]):
-        assert not (len(vertices) == 0 and len(edges) > 0), "edges exists but there are no vertices in the graph yet" # no ghost edges
-        
 
-    
+    def __validity_check(self, vertices: dict[Vertex], edges: dict[Edge]):
+        assert not (
+            len(vertices) == 0 and len(edges) > 0
+        ), "edges exists but there are no vertices in the graph yet"  # no ghost edges
+
 
 class City:
     def __init__(self, height: int, width: int, n_districts_y: int, n_districts_x: int, n_tasks: int, n_scenarios: int):
@@ -102,8 +106,8 @@ class City:
         self.n_tasks = n_tasks
         self.n_scenarios = n_scenarios
 
-        self.positions_start = None      # n_tasks
-        self.positions_end = None   
+        self.positions_start = None  # n_tasks
+        self.positions_end = None
         self.start_times = None
         self.end_times = None
         self.scenario_start_times = None  # n_scenarios x n_tasks
@@ -112,11 +116,13 @@ class City:
         self.scenario_delays_intra = None  # n_scenarios x (24)
         self.graph = SimpleDirectedGraph()
 
-        self.sample_tasks(start_low=TASK_START_TIME_LOW, 
-                          start_high=TASK_START_TIME_HI, 
-                          multiplier_low=TASK_DISTANCE_MULTIPLIER_LOW, 
-                          multiplier_high=TASK_DISTANCE_MULTIPLIER_HI)
-        
+        self.sample_tasks(
+            start_low=TASK_START_TIME_LOW,
+            start_high=TASK_START_TIME_HI,
+            multiplier_low=TASK_DISTANCE_MULTIPLIER_LOW,
+            multiplier_high=TASK_DISTANCE_MULTIPLIER_HI,
+        )
+
         self.sample_scenarios()
 
     def position_valid(self, x: float, y: float) -> bool:
@@ -139,7 +145,7 @@ class City:
         y_start = np.random.uniform(0, self.height, self.n_tasks)
         x_end = np.random.uniform(0, self.width, self.n_tasks)
         y_end = np.random.uniform(0, self.height, self.n_tasks)
-        city_center = (self.width/2, self.height/2)
+        city_center = (self.width / 2, self.height / 2)
 
         positions_start = list(zip(x_start, y_start)) + [city_center] * 2
         positions_end = list(zip(x_end, y_end)) + [city_center] * 2
@@ -160,13 +166,9 @@ class City:
     def sample_congestion(self):
         # zeta^district: size n_districts x 24
         hrs = N_HOURS
-        mu = np.random.uniform(INTRA_DISTRICT_CONGESTION_MU_UNIF_LOW, 
-                               INTRA_DISTRICT_CONGESTION_MU_UNIF_HI, 
-                               1)
-        sigma = np.random.uniform(INTRA_DISTRICT_CONGESTION_SIGMA_UNIF_LO, 
-                                  INTRA_DISTRICT_CONGESTION_SIGMA_UNIF_HI, 
-                                  1)
-        
+        mu = np.random.uniform(INTRA_DISTRICT_CONGESTION_MU_UNIF_LOW, INTRA_DISTRICT_CONGESTION_MU_UNIF_HI, 1)
+        sigma = np.random.uniform(INTRA_DISTRICT_CONGESTION_SIGMA_UNIF_LO, INTRA_DISTRICT_CONGESTION_SIGMA_UNIF_HI, 1)
+
         congestion = np.random.lognormal(mu, sigma, size=(self.n_districts, hrs))
         for i in range(self.n_districts):
             for j in range(1, 24):
@@ -175,17 +177,16 @@ class City:
         # zeta^inter: size 24
         mu = INTER_DISTRICT_CONGESTION_MU
         sigma = INTER_DISTRICT_CONGESTION_SIGMA
-        I = np.random.lognormal(mu, sigma, size=1)[0] # numpy 1.26.4
+        J = np.random.lognormal(mu, sigma, size=1)[0]  # numpy 1.26.4
 
         inter_congestion = np.zeros(hrs)
-        inter_congestion[0] = I
+        inter_congestion[0] = J
         for i in range(1, hrs):
-            inter_congestion[i] = (inter_congestion[i - 1] + 0.1) * I
+            inter_congestion[i] = (inter_congestion[i - 1] + 0.1) * J
 
-        return congestion, inter_congestion    
+        return congestion, inter_congestion
 
-
-    # get scenario start and end times and the scenario delay. Each district of the city 
+    # get scenario start and end times and the scenario delay. Each district of the city
     # has its own delay in a specific scenario, i.e. district -> congestion[scenaorio, hr]
     def sample_scenarios(self):
         start_districts = np.array([self.get_district(x, y) for x, y in self.positions_start])
@@ -221,10 +222,14 @@ class City:
                 end_district_delay = congestion[end_districts[task], self.get_hour(xi_3)]
                 self.scenario_end_times[scenario, task] = xi_3 + end_district_delay
 
-    # initiates a simple directed graph of the city 
+    # initiates a simple directed graph of the city
     def create_graph(self):
-        assert not(self.positions_start is None or self.positions_end is None), "cannot create graph with positions not computed"
-        assert not(self.start_times is None or self.end_times is None), "cannot create graph with start and end times not computed"
+        assert not (
+            self.positions_start is None or self.positions_end is None
+        ), "cannot create graph with positions not computed"
+        assert not (
+            self.start_times is None or self.end_times is None
+        ), "cannot create graph with start and end times not computed"
 
         n_verts = self.n_tasks + 2  # [...job_tasks, starting_task, end_task]
         starting_task = self.n_tasks
@@ -271,12 +276,11 @@ class City:
         result = xi_3 + self.scenario_delays_intra[scenario, dest_district, self.get_hour(xi_3)] - xi_1
 
         return result
-            
 
     # computes the slack in minutes for features (for one edge)
     def compute_slacks_for_features(self, from_node_id: int, to_node_id: int) -> np.ndarray:
         # assumes that the node names are directly convertible to ints
-        assert self.graph is not None , "cannot compute features with empty graph"
+        assert self.graph is not None, "cannot compute features with empty graph"
 
         perturbed_travel_times = np.zeros(self.n_scenarios)
         for scenario in range(self.n_scenarios):
@@ -291,16 +295,18 @@ class City:
         G = self.graph
         E = G.get_edges()
         N = G.get_num_vertices()
-        slack_list = np.array([
+        slack_list = np.array(
             [
-                (self.scenario_start_times[s, int(e.to_vertex.name)] if int(e.to_vertex.name) < N else np.Inf)
-                - (
-                    self.end_times[int(e.from_vertex.name)]
-                    + self.get_perturbed_travel_time(int(e.from_node.name), int(e.to_node.name), s)
-                )
-                for s in range(self.n_scenarios)
+                [
+                    (self.scenario_start_times[s, int(e.to_vertex.name)] if int(e.to_vertex.name) < N else np.Inf)
+                    - (
+                        self.end_times[int(e.from_vertex.name)]
+                        + self.get_perturbed_travel_time(int(e.from_node.name), int(e.to_node.name), s)
+                    )
+                    for s in range(self.n_scenarios)
+                ]
+                for e in E
             ]
-            for e in E
         )
         J = np.array([int(e.from_node.name) for e in E])
         K = np.array([int(e.to_node.name) for e in E])
@@ -308,7 +314,7 @@ class City:
 
     # Returns a matrix of features of size (20, nb_edges)
     def compute_features(self) -> np.ndarray:
-        assert self.graph is not None , "cannot compute features with empty graph"
+        assert self.graph is not None, "cannot compute features with empty graph"
 
         n_feats = NUM_FEATURES
         features = np.zeros((self.graph.get_num_edges(), n_feats))
@@ -333,7 +339,6 @@ class City:
             features[i, slack_cum_distr_idxs] = [np.mean(slacks <= x) for x in cumul]
 
         return features
-    
 
     # TODO compute delays for instance
     def compute_delays(self):
@@ -341,7 +346,7 @@ class City:
         self.scenario_end_times - self.end_times
 
         return d
-        
+
     @staticmethod
     def get_hour(minutes: float) -> int:
         # assert minutes >= 0, f"Minutes must be positive, got {minutes}"
@@ -350,12 +355,7 @@ class City:
 
 
 if __name__ == "__main__":
-    city = City(CITY_HEIGHT_MINUTES, 
-                CITY_WIDTH_MINUTES, 
-                N_DISTRICTS_X, 
-                N_DISTRICTS_Y, 
-                N_TASKS, 
-                N_SCENARIOS)
+    city = City(CITY_HEIGHT_MINUTES, CITY_WIDTH_MINUTES, N_DISTRICTS_X, N_DISTRICTS_Y, N_TASKS, N_SCENARIOS)
     print("non-perturbed start and end times (in minutes): ")
     print(city.start_times)
     print(city.end_times)
@@ -372,10 +372,9 @@ if __name__ == "__main__":
     print("build graph")
     city.create_graph()
     print("build graph done")
-    
+
     print("compute features")
     feats = city.compute_features()
     print("compute features done")
     print("features: ", feats)
     print("features shape: ", feats.shape)
-
