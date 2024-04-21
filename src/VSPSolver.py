@@ -17,7 +17,7 @@ class VSPSolver:
             self.model.addVar(vtype=GRB.BINARY, name=edge.name)
 
         # Add constraints
-        for v in city.graph.get_vertices():
+        for v in city.graph.get_vertices()[:-2]:  # We do not need theses constraints for the nodes `o` and `d`
             # Flow Polytope
             self.model.addConstr(
                 quicksum(self.model.getVarByName(e.name) for e in city.graph.get_outgoing_edges(v))
