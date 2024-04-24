@@ -3,6 +3,7 @@ import gurobipy as gp
 from gurobipy import GRB
 from gurobipy import quicksum
 
+
 # Appendix B.1.1 of https://arxiv.org/pdf/2207.13513.pdf
 class VSPSolver:
     def __init__(self, city):
