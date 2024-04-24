@@ -63,6 +63,7 @@ class SimpleDirectedGraph:
             raise NameError(f"Cannot add vertex with name {v.name}, name already exists")
         else:
             self.vertices[v.name] = v
+            print(f"add vertex {v.name}")
 
     def add_edge(self, e: Edge):
         if not (
@@ -112,9 +113,9 @@ class City:
         self.n_scenarios = n_scenarios
 
         self.positions_start = None  # n_tasks
-        self.positions_end = None
-        self.start_times = None
-        self.end_times = None
+        self.positions_end = None  # n_tasks
+        self.start_times = None  # n_tasks
+        self.end_times = None  # n_tasks
         self.scenario_start_times = None  # n_scenarios x n_tasks
         self.scenario_end_times = None  # n_scenarios x n_tasks
         self.scenario_delays_inter = None  # n_scenarios x (n_districts x 24)
@@ -162,7 +163,6 @@ class City:
         self.positions_end = positions_end
 
         final_task_time = N_HOURS * 60.0 - 1
-
         start_times = np.concatenate((np.random.uniform(start_low, start_high, self.n_tasks), [0.0, final_task_time]))
         multipliers = np.concatenate((np.random.uniform(multiplier_low, multiplier_high, self.n_tasks), np.zeros(2)))
         end_times = start_times + multipliers * np.array(
@@ -244,6 +244,7 @@ class City:
         starting_task = self.n_tasks
         end_task = self.n_tasks + 1
         job_tasks = range(self.n_tasks)
+
         self.task_routes = []
 
         # init vertices
@@ -286,7 +287,7 @@ class City:
 
         return result
 
-    # computes the slack in minutes for features
+    # computes the slack in minutes for features (for one edge)
     def compute_slacks_for_features(self, from_node_id: int, to_node_id: int) -> np.ndarray:
         # assumes that the node names are directly convertible to ints
         assert self.graph is not None, "cannot compute features with empty graph"
@@ -298,7 +299,8 @@ class City:
         perturbed_start_times = self.scenario_start_times[:, to_node_id]
         return perturbed_start_times - (perturbed_end_times + perturbed_travel_times)
 
-    # TODO computes the slacks in minutes for all instances
+    # TODO computes the slacks in minutes for an instance of the VSP problem (i.e. for all edges)
+
     def compute_slacks_for_instance(self) -> np.ndarray:
         # assumes that vertex names can be directly converted into ints
         G = self.graph
@@ -306,14 +308,16 @@ class City:
         N = G.get_num_vertices()
         slack_list = np.array(
             [
-                (self.scenario_start_times[s, int(e.to_vertex.name)] if int(e.to_vertex.name) < N else np.Inf)
-                - (
-                    self.end_times[int(e.from_vertex.name)]
-                    + self.get_perturbed_travel_time(int(e.from_node.name), int(e.to_node.name), s)
-                )
-                for s in range(self.n_scenarios)
+                [
+                    (self.scenario_start_times[s, int(e.to_vertex.name)] if int(e.to_vertex.name) < N else np.Inf)
+                    - (
+                        self.end_times[int(e.from_vertex.name)]
+                        + self.get_perturbed_travel_time(int(e.from_node.name), int(e.to_node.name), s)
+                    )
+                    for s in range(self.n_scenarios)
+                ]
+                for e in E
             ]
-            for e in E
         )
         J = np.array([int(e.from_node.name) for e in E])
         K = np.array([int(e.to_node.name) for e in E])
