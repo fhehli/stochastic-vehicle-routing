@@ -52,6 +52,12 @@ class SimpleDirectedGraph:
     def get_incoming_edges(self, vertex: Vertex) -> list[Edge]:
         return [e for e in self.get_edges() if e.to_vertex == vertex]
 
+    def get_sink(self) -> Vertex:
+        return list(self.vertices.values())[-1]
+
+    def get_source(self) -> Vertex:
+        return list(self.vertices.values())[-2]
+
     def add_vertex(self, v: Vertex):
         if self.__check_exists_vertex_name(v.name):
             raise NameError(f"Cannot add vertex with name {v.name}, name already exists")
@@ -121,6 +127,10 @@ class City:
             multiplier_low=TASK_DISTANCE_MULTIPLIER_LOW,
             multiplier_high=TASK_DISTANCE_MULTIPLIER_HI,
         )
+
+        # Store metrics
+        self.vehicle_cost = VEHICLE_COST
+        self.delay_cost = DELAY_COST
 
         self.sample_scenarios()
 

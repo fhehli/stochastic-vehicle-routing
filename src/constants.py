@@ -14,6 +14,7 @@ INTRA_DISTRICT_CONGESTION_SIGMA_UNIF_HI = 0.6
 INTER_DISTRICT_CONGESTION_MU = 0.02
 INTER_DISTRICT_CONGESTION_SIGMA = 0.05
 VEHICLE_COST = 10  # TODO: find out actual number used
+DELAY_COST = 1  # TODO: find out actual number used
 
 # task properties
 N_TASKS = 10
