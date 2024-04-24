@@ -106,12 +106,12 @@ class City:
         self.n_tasks = n_tasks
         self.n_scenarios = n_scenarios
 
-        self.positions_start = None        # n_tasks
-        self.positions_end = None          # n_tasks
-        self.start_times = None            # n_tasks
-        self.end_times = None              # n_tasks
-        self.scenario_start_times = None   # n_scenarios x n_tasks
-        self.scenario_end_times = None     # n_scenarios x n_tasks
+        self.positions_start = None  # n_tasks
+        self.positions_end = None  # n_tasks
+        self.start_times = None  # n_tasks
+        self.end_times = None  # n_tasks
+        self.scenario_start_times = None  # n_scenarios x n_tasks
+        self.scenario_end_times = None  # n_scenarios x n_tasks
         self.scenario_delays_inter = None  # n_scenarios x (n_districts x 24)
         self.scenario_delays_intra = None  # n_scenarios x (24)
         self.graph = SimpleDirectedGraph()
@@ -247,7 +247,6 @@ class City:
             self.graph.add_edge(Edge(from_vertex=Vertex(starting_task), to_vertex=Vertex(origin_id)))
             self.graph.add_edge(Edge(from_vertex=Vertex(origin_id), to_vertex=Vertex(end_task)))
 
-
             # there is an edge only if we can reach destination from origin before start of task
             for dest_id in range((origin_id + 1), self.n_tasks):
                 # travel time from task_i end position to task_j start position
@@ -275,7 +274,6 @@ class City:
             + self.scenario_delays_inter[scenario, self.get_hour(xi_2)]
         )
         result = xi_3 + self.scenario_delays_intra[scenario, dest_district, self.get_hour(xi_3)] - xi_1
-
 
         return result
 
@@ -371,7 +369,6 @@ if __name__ == "__main__":
     assert np.all(
         (city.scenario_start_times <= city.scenario_end_times)[:, :-1]
     ), "start times must be less than end times"
-
 
     print("build graph")
     city.create_graph()
