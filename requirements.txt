@@ -4,3 +4,7 @@ torch==2.2.2
 torchvision==0.17.2
 gurobipy==11.0.1
 ruff==0.3.5
+absl==0.0
+matplotlib==3.8.4
+networkx==3.3
+PyYAML==6.0.1
