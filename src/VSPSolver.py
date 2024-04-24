@@ -42,5 +42,4 @@ class VSPSolver:
         # Optimize model
         self.model.optimize()
 
-        # TODO: what should we return, the cost (theta*result) or the result?
         return [var.X for var in self.model.getVars()]
