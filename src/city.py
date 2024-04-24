@@ -106,12 +106,12 @@ class City:
         self.n_tasks = n_tasks
         self.n_scenarios = n_scenarios
 
-        self.positions_start = None  # n_tasks
-        self.positions_end = None
-        self.start_times = None
-        self.end_times = None
-        self.scenario_start_times = None  # n_scenarios x n_tasks
-        self.scenario_end_times = None  # n_scenarios x n_tasks
+        self.positions_start = None        # n_tasks
+        self.positions_end = None          # n_tasks
+        self.start_times = None            # n_tasks
+        self.end_times = None              # n_tasks
+        self.scenario_start_times = None   # n_scenarios x n_tasks
+        self.scenario_end_times = None     # n_scenarios x n_tasks
         self.scenario_delays_inter = None  # n_scenarios x (n_districts x 24)
         self.scenario_delays_intra = None  # n_scenarios x (24)
         self.graph = SimpleDirectedGraph()
@@ -153,7 +153,6 @@ class City:
         self.positions_end = positions_end
 
         final_task_time = N_HOURS * 60.0 - 1
-
         start_times = np.concatenate((np.random.uniform(start_low, start_high, self.n_tasks), [0.0, final_task_time]))
         multipliers = np.concatenate((np.random.uniform(multiplier_low, multiplier_high, self.n_tasks), np.zeros(2)))
         end_times = start_times + multipliers * np.array(
@@ -235,6 +234,7 @@ class City:
         starting_task = self.n_tasks
         end_task = self.n_tasks + 1
         job_tasks = range(self.n_tasks)
+
         self.task_routes = []
 
         # init vertices
@@ -246,6 +246,7 @@ class City:
             # add every task to base
             self.graph.add_edge(Edge(from_vertex=Vertex(starting_task), to_vertex=Vertex(origin_id)))
             self.graph.add_edge(Edge(from_vertex=Vertex(origin_id), to_vertex=Vertex(end_task)))
+
 
             # there is an edge only if we can reach destination from origin before start of task
             for dest_id in range((origin_id + 1), self.n_tasks):
@@ -275,6 +276,7 @@ class City:
         )
         result = xi_3 + self.scenario_delays_intra[scenario, dest_district, self.get_hour(xi_3)] - xi_1
 
+
         return result
 
     # computes the slack in minutes for features (for one edge)
@@ -290,6 +292,7 @@ class City:
         return perturbed_start_times - (perturbed_end_times + perturbed_travel_times)
 
     # TODO computes the slacks in minutes for an instance of the VSP problem (i.e. for all edges)
+
     def compute_slacks_for_instance(self) -> np.ndarray:
         # assumes that vertex names can be directly converted into ints
         G = self.graph
@@ -368,6 +371,7 @@ if __name__ == "__main__":
     assert np.all(
         (city.scenario_start_times <= city.scenario_end_times)[:, :-1]
     ), "start times must be less than end times"
+
 
     print("build graph")
     city.create_graph()
