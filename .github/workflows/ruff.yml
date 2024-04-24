@@ -14,5 +14,5 @@ jobs:
     - run: ruff format . --config=.ruff.toml
     - uses: stefanzweifel/git-auto-commit-action@v5
       with:
-        commit_message: 'style fixes by ruff'
-        commit_author: 'Ruff <actions@github.com>'
+        commit_message: 'Style fixes by ruff'
+        commit_author: 'Actions Bot <actions@github.com>'
