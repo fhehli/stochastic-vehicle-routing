@@ -1,5 +1,4 @@
 import numpy as np
-import scipy
 
 from constants import *
 
@@ -103,7 +102,15 @@ class SimpleDirectedGraph:
 
 
 class City:
-    def __init__(self, height: int, width: int, n_districts_y: int, n_districts_x: int, n_tasks: int, n_scenarios: int):
+    def __init__(
+        self,
+        height: int,
+        width: int,
+        n_districts_y: int,
+        n_districts_x: int,
+        n_tasks: int,
+        n_scenarios: int,
+    ):
         self.height = height
         self.width = width
         self.n_districts_x = n_districts_x
@@ -150,7 +157,13 @@ class City:
         # Returns the district number of the district at position (x, y)
         return int(y / self.height * self.n_districts_y) * self.n_districts_x + int(x / self.width * self.n_districts_x)
 
-    def sample_tasks(self, start_low: float, start_high: float, multiplier_low: float, multiplier_high: float):
+    def sample_tasks(
+        self,
+        start_low: float,
+        start_high: float,
+        multiplier_low: float,
+        multiplier_high: float,
+    ):
         x_start = np.random.uniform(0, self.width, self.n_tasks)
         y_start = np.random.uniform(0, self.height, self.n_tasks)
         x_end = np.random.uniform(0, self.width, self.n_tasks)
@@ -163,8 +176,18 @@ class City:
         self.positions_end = positions_end
 
         final_task_time = N_HOURS * 60.0 - 1
-        start_times = np.concatenate((np.random.uniform(start_low, start_high, self.n_tasks), [0.0, final_task_time]))
-        multipliers = np.concatenate((np.random.uniform(multiplier_low, multiplier_high, self.n_tasks), np.zeros(2)))
+        start_times = np.concatenate(
+            (
+                np.random.uniform(start_low, start_high, self.n_tasks),
+                [0.0, final_task_time],
+            )
+        )
+        multipliers = np.concatenate(
+            (
+                np.random.uniform(multiplier_low, multiplier_high, self.n_tasks),
+                np.zeros(2),
+            )
+        )
         end_times = start_times + multipliers * np.array(
             [self.distance(x1, y1, x2, y2) for (x1, y1), (x2, y2) in zip(positions_start, positions_end)]
         )
@@ -175,8 +198,16 @@ class City:
     def sample_congestion(self):
         # zeta^district: size n_districts x 24
         hrs = N_HOURS
-        mu = np.random.uniform(INTRA_DISTRICT_CONGESTION_MU_UNIF_LOW, INTRA_DISTRICT_CONGESTION_MU_UNIF_HI, 1)
-        sigma = np.random.uniform(INTRA_DISTRICT_CONGESTION_SIGMA_UNIF_LO, INTRA_DISTRICT_CONGESTION_SIGMA_UNIF_HI, 1)
+        mu = np.random.uniform(
+            INTRA_DISTRICT_CONGESTION_MU_UNIF_LOW,
+            INTRA_DISTRICT_CONGESTION_MU_UNIF_HI,
+            1,
+        )
+        sigma = np.random.uniform(
+            INTRA_DISTRICT_CONGESTION_SIGMA_UNIF_LO,
+            INTRA_DISTRICT_CONGESTION_SIGMA_UNIF_HI,
+            1,
+        )
 
         congestion = np.random.lognormal(mu, sigma, size=(self.n_districts, hrs))
         for i in range(self.n_districts):
@@ -205,9 +236,11 @@ class City:
 
         # for every task, sample a delay for every scenario
         # is 0 by default using low = -inf and high = 1
-        # TODO: should this be constant for all tasks? Also, shouldn't this be zero for the dummy tasks?
+        # Maybe we should remove this to make the code more readable?
         scenario_start_random_delay = np.random.lognormal(
-            SCENARIO_START_ZERO_UNIFORM_LOW, SCENARIO_START_ZERO_UNIFORM_HI, self.n_scenarios
+            SCENARIO_START_ZERO_UNIFORM_LOW,
+            SCENARIO_START_ZERO_UNIFORM_HI,
+            self.n_scenarios,
         )
         self.scenario_start_times = np.tile(self.start_times, self.n_scenarios).reshape(
             (self.n_scenarios, self.n_tasks + 2)
@@ -299,29 +332,18 @@ class City:
         perturbed_start_times = self.scenario_start_times[:, to_node_id]
         return perturbed_start_times - (perturbed_end_times + perturbed_travel_times)
 
-    # TODO computes the slacks in minutes for an instance of the VSP problem (i.e. for all edges)
-
+    # returns a matrix slacks[node_source, node_dest, scenario]
     def compute_slacks_for_instance(self) -> np.ndarray:
         # assumes that vertex names can be directly converted into ints
-        G = self.graph
-        E = G.get_edges()
-        N = G.get_num_vertices()
-        slack_list = np.array(
-            [
-                [
-                    (self.scenario_start_times[s, int(e.to_vertex.name)] if int(e.to_vertex.name) < N else np.Inf)
-                    - (
-                        self.end_times[int(e.from_vertex.name)]
-                        + self.get_perturbed_travel_time(int(e.from_node.name), int(e.to_node.name), s)
-                    )
-                    for s in range(self.n_scenarios)
-                ]
-                for e in E
-            ]
-        )
-        J = np.array([int(e.from_node.name) for e in E])
-        K = np.array([int(e.to_node.name) for e in E])
-        return scipy.sparse(J, K, slack_list)  # TODO: check this
+        num_vertices = self.graph.get_num_vertices()
+        slacks = np.zeros((num_vertices, num_vertices, self.n_scenarios))
+
+        for edge in self.graph.get_edges():
+            from_vertex_id = int(edge.from_vertex.name)
+            to_vertex_id = int(edge.to_vertex.name)
+            slacks[from_vertex_id, to_vertex_id, :] = self.compute_slacks_for_features(from_vertex_id, to_vertex_id)
+
+        return slacks
 
     # Returns a matrix of features of size (20, nb_edges)
     def compute_features(self) -> np.ndarray:
@@ -351,12 +373,8 @@ class City:
 
         return features
 
-    # TODO compute delays for instance
     def compute_delays(self):
-        d = np.zeros((self.n_tasks, self.n_scenarios))
-        self.scenario_end_times - self.end_times
-
-        return d
+        return self.scenario_end_times - self.end_times
 
     @staticmethod
     def get_hour(minutes: float) -> int:
@@ -366,7 +384,14 @@ class City:
 
 
 if __name__ == "__main__":
-    city = City(CITY_HEIGHT_MINUTES, CITY_WIDTH_MINUTES, N_DISTRICTS_X, N_DISTRICTS_Y, N_TASKS, N_SCENARIOS)
+    city = City(
+        CITY_HEIGHT_MINUTES,
+        CITY_WIDTH_MINUTES,
+        N_DISTRICTS_X,
+        N_DISTRICTS_Y,
+        N_TASKS,
+        N_SCENARIOS,
+    )
     print("non-perturbed start and end times (in minutes): ")
     print(city.start_times)
     print(city.end_times)
