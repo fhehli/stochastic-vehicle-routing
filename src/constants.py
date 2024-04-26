@@ -18,6 +18,7 @@ INTRA_DISTRICT_CONGESTION_SIGMA_UNIF_HI = 0.6
 INTER_DISTRICT_CONGESTION_MU = 0.02
 INTER_DISTRICT_CONGESTION_SIGMA = 0.05
 VEHICLE_COST = 1000                             # cost for 1 vehicle
+DELAY_COST = 2.0                                # cost of one minute of delay
 
 # task properties
 N_TASKS = 10
