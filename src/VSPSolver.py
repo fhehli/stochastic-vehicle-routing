@@ -5,6 +5,7 @@ from gurobipy import quicksum
 
 
 # Appendix B.1.1 of https://arxiv.org/pdf/2207.13513.pdf
+# https://github.com/BatyLeo/StochasticVehicleScheduling.jl/blob/main/src/learning/easy_problem.jl
 class VSPSolver:
     def __init__(self, city):
         # Store the city
