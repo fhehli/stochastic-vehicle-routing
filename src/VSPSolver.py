@@ -25,12 +25,12 @@ class VSPSolver:
         for v in list(self.city.graph.get_vertices())[:-2]:
             # Flow Polytope
             self.model.addConstr(
-                quicksum(self.model.getVarByName(e.name) for e in self.city.graph.get_outgoing_edges(v))
-                == quicksum(self.model.getVarByName(e.name) for e in self.city.graph.get_incoming_edges(v))
+                quicksum(self.model.getVarByName(e.name) for e in self.city.graph.get_incoming_edges(v))
+                == quicksum(self.model.getVarByName(e.name) for e in self.city.graph.get_outgoing_edges(v))
             )
             # Task Covering
             self.model.addConstr(
-                quicksum(self.model.getVarByName(e.name) for e in self.city.graph.get_outgoing_edges(v)) == 1
+                quicksum(self.model.getVarByName(e.name) for e in self.city.graph.get_incoming_edges(v)) == 1
             )
 
         # Update manually
