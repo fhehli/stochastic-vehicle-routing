@@ -107,4 +107,4 @@ class SVSPSolver:
         self.model.optimize()
 
         # TODO: which variables do we need to return, only the selected edges or also the delays
-        return [self.model.getVarByName(e.name).X for e in self.city.graph.get_edges()]
+        return np.array([self.model.getVarByName(e.name).X for e in self.city.graph.get_edges()])
