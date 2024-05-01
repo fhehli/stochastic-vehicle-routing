@@ -7,23 +7,25 @@ class Trainer:
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         self.model = model
-        self.train_loader, self.val_loader = data_loaders
+        self.train_loader, self.val_loader, self.test_loader = data_loaders
         self.optimizer = optimizer
         self.criterion = criterion
 
+        self.n_epochs = config["train"]["n_epochs"]
+
     def compute_metrics(self, i):
-        raise NotImplementedError
+        pass
 
     def save_model(self, i):
-        raise NotImplementedError
+        pass
 
     def train_epoch(self, i):
         self.model.train()
-        for inputs, labels in self.data_loader:
+        for inputs, labels, graph in self.train_loader:
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
             self.optimizer.zero_grad()
-            outputs = self.model(inputs)
+            outputs = self.model(inputs, graph)
             loss = self.criterion(outputs, labels).mean()
             loss.backward()
             self.optimizer.step()
