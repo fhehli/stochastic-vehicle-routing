@@ -23,6 +23,7 @@ class SVSPSolver:
 
         # Create the Gurobi Solver instance
         self.model = gp.Model("SVSP")
+        self.model.setParam("OutputFlag", 0)
 
         # Create the linear variables for the Solver
         # One for each edge

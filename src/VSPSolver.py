@@ -10,6 +10,7 @@ class VSPSolver:
     def solve(self, theta, graph):
         # Create the Gurobi Solver instance
         model = gp.Model("VSP")
+        model.setParam("OutputFlag", 0)
 
         # Create the linear variables for the Solver (one for each edge)
         for edge in graph.get_edges():
