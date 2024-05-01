@@ -35,6 +35,7 @@ def get_model(config) -> nn.Module:
     name = config["model"]["name"]
     assert name in MODELS, f"Model not found in {MODELS.keys()}"
     model_args = config["model"]["args"]
+    model_args = model_args if model_args is not None else {}
 
     return MODELS[name](**model_args)
 
