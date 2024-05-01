@@ -15,9 +15,10 @@ def main(args):
     model = get_model(config)
     data_loaders = get_dataloaders(config)
     optimizer_class, optimizer_kwargs = get_optimizer(config)
-    criterion = get_criterion(config)
+    criterion_class, criterion_kwargs = get_criterion(config)
 
     optimizer = optimizer_class(model.parameters(), **optimizer_kwargs)
+    criterion = criterion_class(func=model, **criterion_kwargs)
 
     trainer = Trainer(model, data_loaders, optimizer, criterion, config)
     trainer.train()

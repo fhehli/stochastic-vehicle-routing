@@ -16,6 +16,9 @@ MODELS = {
 OPTIMIZERS = {
     "AdamW": AdamW,
 }
+CRITERIA = {
+    "FenchelYoungLoss": FenchelYoungLoss,
+}
 
 
 class CitiesDataset(Dataset):
@@ -73,4 +76,9 @@ def get_optimizer(config) -> Tuple[Optimizer, dict]:
 
 
 def get_criterion(config):
-    return FenchelYoungLoss()
+    name = config["train"]["criterion"]["name"]
+    assert name in CRITERIA, f"Criterion not found in {CRITERIA.keys()}"
+    args = config["train"]["criterion"]["args"]
+    args = args if args is not None else {}
+
+    return CRITERIA[name], args

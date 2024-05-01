@@ -5,6 +5,9 @@ data:
     val: .33
     test: .33
 train:
+  criterion:
+    name: "FenchelYoungLoss"
+    args:
   batch_size: 1
   metrics:
     train_and_validation:
