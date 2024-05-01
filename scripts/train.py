@@ -5,7 +5,7 @@ import torch
 import yaml
 
 from src.trainer import Trainer
-from src.utils import get_model, get_criterion, get_optimizer, get_data_loaders
+from src.utils import get_model, get_criterion, get_optimizer, get_dataloaders
 
 
 def main(args):
@@ -13,7 +13,7 @@ def main(args):
         config = yaml.safe_load(file)
 
     model = get_model(config)
-    data_loaders = get_data_loaders(config)
+    data_loaders = get_dataloaders(config)
     optimizer_class, optimizer_kwargs = get_optimizer(config)
     criterion = get_criterion(config)
 
