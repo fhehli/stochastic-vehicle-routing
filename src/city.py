@@ -62,7 +62,6 @@ class SimpleDirectedGraph:
             raise NameError(f"Cannot add vertex with name {v.name}, name already exists")
         else:
             self.vertices[v.name] = v
-            print(f"add vertex {v.name}")
 
     def add_edge(self, e: Edge):
         if not (
@@ -81,7 +80,6 @@ class SimpleDirectedGraph:
                         f"cannot add edge, duplicate edge with same from and to vertex with name {k} already exists"
                     )
             self.edges[e.name] = e
-            print(f"add edge {e.from_vertex.name} -> {e.to_vertex.name}")
 
     def __check_exists_vertex_name(self, name: str) -> bool:
         if len(self.vertices) == 0:
@@ -110,7 +108,9 @@ class City:
         n_districts_x: int,
         n_tasks: int,
         n_scenarios: int,
+        seed: int = 0,
     ):
+        np.random.seed(seed)
         self.height = height
         self.width = width
         self.n_districts_x = n_districts_x
