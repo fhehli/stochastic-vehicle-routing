@@ -8,16 +8,16 @@ import pickle
 
 
 def main(args):
-    # Create the Dataset
-    dataset = {"X": [], "Y": []}
-    for _ in range(NUM_SAMPLES):
-        data = create_datapoint()
-        dataset["X"].append(data[0])
-        dataset["Y"].append(data[1])
+    X, Y, graphs = [], [], []
+    for _ in range(args.n_samples):
+        x, y, graph = create_datapoint(args)
+        X.append(x)
+        Y.append(y)
+        graphs.append(graph)
 
-    # Store the created Dataset
     with open(args.out_file, "wb") as out_file:
-        pickle.dump(np.array(dataset), out_file)
+        data = {"X": np.array(X), "Y": np.array(Y), "graphs": graphs, "args": vars(args)}
+        pickle.dump(data, out_file)
 
 
 def create_datapoint(args):
@@ -42,7 +42,7 @@ def create_datapoint(args):
     # Compute the solution (supervised dataset)
     solution = solver.solve()  # Array with length
 
-    return [glm_features, solution]
+    return glm_features, solution, city.graph
 
 
 if __name__ == "__main__":
