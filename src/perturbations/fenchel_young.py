@@ -23,7 +23,7 @@
 import torch
 import torch.nn as nn
 
-import perturbations
+import src.perturbations.perturbations as perturbations
 
 
 class PerturbedFunc(torch.autograd.Function):

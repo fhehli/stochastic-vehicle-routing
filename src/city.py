@@ -1,6 +1,6 @@
 import numpy as np
 
-from constants import *
+from src.constants import *
 
 
 class Vertex:
