@@ -102,7 +102,9 @@ class City:
         n_districts_x: int,
         n_tasks: int,
         n_scenarios: int,
+        seed: int = 0,
     ):
+        np.random.seed(seed)
         self.height = height
         self.width = width
         self.n_districts_x = n_districts_x
