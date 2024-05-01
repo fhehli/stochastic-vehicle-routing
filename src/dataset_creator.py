@@ -1,10 +1,10 @@
 import argparse
+import pickle
 
 # This script can be used to create a training dataset
-from city import City
-from SVSPSolver import SVSPSolver
-from constants import *
-import pickle
+from src.city import City
+from src.SVSPSolver import SVSPSolver
+from src.constants import *
 
 
 def main(args):
