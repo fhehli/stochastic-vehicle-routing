@@ -62,12 +62,13 @@ def get_dataloaders(config):
     return train_loader, val_loader, test_loader
 
 
-def get_optimizer(config):
-    name = config["optimizer"]["name"]
+def get_optimizer(config) -> Tuple[Optimizer, dict]:
+    name = config["train"]["optimizer"]["name"]
     assert name in OPTIMIZERS, f"Optimizer not found in {OPTIMIZERS.keys()}"
-    optimizer_args = config["optimizer"]["args"]
+    optimizer_args = config["train"]["optimizer"]["args"]
+    optimizer_args = optimizer_args if optimizer_args is not None else {}
 
-    return OPTIMIZERS[name](**optimizer_args)
+    return OPTIMIZERS[name], optimizer_args
 
 
 def get_criterion(config):
