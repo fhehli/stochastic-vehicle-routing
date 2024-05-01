@@ -1,0 +1,22 @@
+data:
+  path: "data/10tasks5scenarios.pkl"
+  split:
+    train: .34
+    val: .33
+    test: .33
+train:
+  batch_size: 1
+  metrics:
+    train_and_validation:
+    train:
+    validation:
+  optimizer:
+    name: "AdamW"
+    args:
+  n_epochs: 50
+  save_every_n_epochs: 50
+  log_every_n_epochs: 1
+model:
+  name: "FenchelYoungGLM"
+  args:
+    n_features: 20
