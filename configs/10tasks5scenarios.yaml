@@ -7,7 +7,9 @@ data:
 train:
   criterion:
     name: "FenchelYoungLoss"
-    args:
+    args: 
+      batched: False
+      num_samples: 20
   batch_size: 1
   metrics:
     train_and_validation:
