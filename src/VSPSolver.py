@@ -1,3 +1,5 @@
+from torch import tensor
+
 # Gurobi Solver
 import gurobipy as gp
 from gurobipy import GRB
@@ -33,9 +35,9 @@ class VSPSolver:
         model.update()
 
         # Set objective
-        model.setObjective(theta.dot(model.getVars()), GRB.MINIMIZE)
+        model.setObjective(sum([t * v for t, v in zip(theta, model.getVars())]), GRB.MINIMIZE)
 
         # Optimize model
         model.optimize()
 
-        return [var.X for var in model.getVars()]
+        return tensor([var.X for var in model.getVars()])
