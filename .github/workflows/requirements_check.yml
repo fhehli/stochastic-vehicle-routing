@@ -2,7 +2,7 @@ name: Check requirements file
 on: push
 
 jobs:
-  check_reuqirements:
+  check_requirements:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
