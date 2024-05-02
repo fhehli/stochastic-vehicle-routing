@@ -44,15 +44,14 @@ def visualize_graphs(nxgraph: nx.DiGraph, city: City):
         pos = nx.spring_layout(nxgraph)
         nx.draw(nxgraph, pos, with_labels=True, node_size=400, node_color="skyblue", font_size=10, arrows=True)
 
-        # labels = nx.get_edge_attributes(nxgraph, 'duration')
-        # nx.draw_networkx_edge_labels(nxgraph, pos, edge_labels=labels)
+        pos = nx.spring_layout(nxgraph)
+        nx.draw(nxgraph, pos, with_labels=True, node_size=1500, node_color="skyblue", font_size=10, arrows=True)
 
-        # for node, (time, location) in nxgraph.nodes.items():
-        #     plt.text(pos[node][0], pos[node][1], f"({time})", ha='center', va='center')
+    # labels = nx.get_edge_attributes(nxgraph, 'duration')
+    # nx.draw_networkx_edge_labels(nxgraph, pos, edge_labels=labels)
 
-        # plt.text(0.8, 0.9, f"Total time: {max([time for time, _ in nxgraph.nodes])}", ha='center', va='center', transform=plt.gca().transAxes)
-        plt.title("Tasks Visualization")
-        plt.show()
+    # for node, (time, location) in nxgraph.nodes.items():
+    #     plt.text(pos[node][0], pos[node][1], f"({time})", ha='center', va='center')
 
 
 def visualize_tasks(city: City):
