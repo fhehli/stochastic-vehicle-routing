@@ -1,5 +1,9 @@
 name: Check requirements file
-on: push
+on:
+  push:
+    paths:
+      - requirements.txt
+
 
 jobs:
   check_requirements:
