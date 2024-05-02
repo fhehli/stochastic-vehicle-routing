@@ -335,7 +335,7 @@ class City:
 
         return slacks
 
-    # Returns a matrix of features of size (20, nb_edges)
+    # Returns a matrix of features of size (nb_edges, 20)
     def compute_features(self) -> np.ndarray:
         assert self.graph is not None, "cannot compute features with empty graph"
 
@@ -362,6 +362,43 @@ class City:
             features[i, slack_cum_distr_idxs] = [np.mean(slacks <= x) for x in cumul]
 
         return features
+
+    # Returns a matrix of features of size (nb_edges, 20 + 4 * nb_aggregation_methods (2) * 20)
+    # Aggregates feautures of incmoing and outgoing edges of the from and to vertices seperately
+    # TODO: Think about the aggregation methods and if we should really separate incoming/outgoing/from vertex/to vertex
+    def compute_features_neighbours(self) -> np.ndarray:
+        features = self.compute_features()
+
+        edge_name_to_index = {edge.name: i for i, edge in enumerate(self.graph.get_edges())}
+
+        def features_for_edges(edges: list[Edge]) -> np.ndarray:
+            if len(edges) == 0:
+                return np.zeros((1, NUM_FEATURES))
+            return np.stack([features[edge_name_to_index[e.name]] for e in edges])
+
+        def aggregate_features(features: np.ndarray) -> np.ndarray:
+            return np.concatenate((np.mean(features, axis=0), np.std(features, axis=0)))
+
+        neighbour_features = np.zeros((self.graph.get_num_edges(), 4 * 2 * NUM_FEATURES))
+
+        for i, edge in enumerate(self.graph.get_edges()):
+            from_vertex_inc_features = aggregate_features(
+                features_for_edges(self.graph.get_incoming_edges(edge.from_vertex))
+            )
+            from_vertex_out_features = aggregate_features(
+                features_for_edges(self.graph.get_outgoing_edges(edge.from_vertex))
+            )
+            to_vertex_inc_features = aggregate_features(
+                features_for_edges(self.graph.get_incoming_edges(edge.to_vertex))
+            )
+            to_vertex_out_features = aggregate_features(
+                features_for_edges(self.graph.get_outgoing_edges(edge.to_vertex))
+            )
+            neighbour_features[i] = np.concatenate(
+                (from_vertex_inc_features, from_vertex_out_features, to_vertex_inc_features, to_vertex_out_features)
+            )
+
+        return np.concatenate((features, neighbour_features), axis=1)
 
     def compute_delays(self):
         return self.scenario_end_times - self.end_times
@@ -404,3 +441,7 @@ if __name__ == "__main__":
     print("compute features done")
     print("features: ", feats)
     print("features shape: ", feats.shape)
+
+    neighbours_feats = city.compute_features_neighbours()
+    assert (neighbours_feats[:, :20] == feats).all(), "features should be included in neighbour features"
+    print("neighbours features shape: ", neighbours_feats.shape)
