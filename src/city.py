@@ -4,6 +4,7 @@ import scipy
 from constants import *
 
 
+
 class Vertex:
     def __init__(self, name, **kwargs) -> None:
         self.name = str(name)
@@ -73,7 +74,7 @@ class SimpleDirectedGraph:
                     raise NameError(f"cannot add edge with name {e.name}, name already exists")
                 if v.from_vertex.name == e.from_vertex.name and v.to_vertex.name == e.to_vertex.name:
                     raise NameError(
-                        f"cannot add edge, duplicate edge with same from and to vertex with name {k} al;ready exists"
+                        f"cannot add edge, duplicate edge with same from and to vertex with name {k} already exists"
                     )
             self.edges[e.name] = e
             print(f"add edge {e.from_vertex.name} -> {e.to_vertex.name}")
@@ -139,13 +140,16 @@ class City:
         assert self.position_valid(x, y), f"Position ({x}, {y}) is not within the city boundaries"
         # Returns the district number of the district at position (x, y)
         return int(y / self.height * self.n_districts_y) * self.n_districts_x + int(x / self.width * self.n_districts_x)
+    
+    def get_center(self) -> tuple:
+        return (self.width / 2, self.height / 2)
 
     def sample_tasks(self, start_low: float, start_high: float, multiplier_low: float, multiplier_high: float):
         x_start = np.random.uniform(0, self.width, self.n_tasks)
         y_start = np.random.uniform(0, self.height, self.n_tasks)
         x_end = np.random.uniform(0, self.width, self.n_tasks)
         y_end = np.random.uniform(0, self.height, self.n_tasks)
-        city_center = (self.width / 2, self.height / 2)
+        city_center = self.get_center()
 
         positions_start = list(zip(x_start, y_start)) + [city_center] * 2
         positions_end = list(zip(x_end, y_end)) + [city_center] * 2
@@ -155,8 +159,9 @@ class City:
         final_task_time = N_HOURS * 60.0 - 1
         start_times = np.concatenate((np.random.uniform(start_low, start_high, self.n_tasks), [0.0, final_task_time]))
         multipliers = np.concatenate((np.random.uniform(multiplier_low, multiplier_high, self.n_tasks), np.zeros(2)))
+
         end_times = start_times + multipliers * np.array(
-            [self.distance(x1, y1, x2, y2) for (x1, y1), (x2, y2) in zip(positions_start, positions_end)]
+            [self.distance(x1, y1, x2, y2) for ((x1, y1), (x2, y2)) in zip(positions_start, positions_end)]
         )
         self.start_times = start_times
         self.end_times = end_times
