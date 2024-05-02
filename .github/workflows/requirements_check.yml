@@ -1,11 +1,9 @@
-name: Lint and Commit
+name: Check requirements file
 on: push
 
 jobs:
-  lint:
+  check_reuqirements:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
