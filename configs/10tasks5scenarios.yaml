@@ -19,7 +19,8 @@ train:
     args:
   n_epochs: 50
   save_every_n_epochs: 50
-  log_every_n_epochs: 1
+  save_dir: "models/10tasks5scenarios"
+  eval_every_n_epochs: 1
 model:
   name: "FenchelYoungGLM"
   args:
