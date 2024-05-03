@@ -9,7 +9,6 @@ from torch.utils.data import DataLoader, Dataset, random_split
 from src.city import SimpleDirectedGraph
 from src.models import FenchelYoungGLM
 from src.perturbations.fenchel_young import FenchelYoungLoss
-from src.VSPSolver import solve_vsp
 
 MODELS = {
     "FenchelYoungGLM": FenchelYoungGLM,
