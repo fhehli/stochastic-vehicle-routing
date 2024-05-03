@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader, Dataset, random_split
 from src.city import SimpleDirectedGraph
 from src.models import FenchelYoungGLM
 from src.perturbations.fenchel_young import FenchelYoungLoss
+from src.VSPSolver import solve_vsp
 
 MODELS = {
     "FenchelYoungGLM": FenchelYoungGLM,
@@ -34,13 +35,15 @@ class CitiesDataset(Dataset):
         return self.X[idx], self.Y[idx], self.graphs[idx]
 
 
-def get_model(config) -> nn.Module:
+def get_model(config, device) -> nn.Module:
     name = config["model"]["name"]
     assert name in MODELS, f"Model not found in {MODELS.keys()}"
-    model_args = config["model"]["args"]
-    model_args = model_args if model_args is not None else {}
+    kwargs = config["model"]["args"]
+    kwargs = kwargs if kwargs is not None else {}
+    model = MODELS[name](**kwargs)
+    model.to(device)
 
-    return MODELS[name](**model_args)
+    return model
 
 
 def get_dataloaders(config):
@@ -69,16 +72,16 @@ def get_dataloaders(config):
 def get_optimizer(config) -> Tuple[Optimizer, dict]:
     name = config["train"]["optimizer"]["name"]
     assert name in OPTIMIZERS, f"Optimizer not found in {OPTIMIZERS.keys()}"
-    optimizer_args = config["train"]["optimizer"]["args"]
-    optimizer_args = optimizer_args if optimizer_args is not None else {}
+    kwargs = config["train"]["optimizer"]["args"]
+    kwargs = kwargs if kwargs is not None else {}
 
-    return OPTIMIZERS[name], optimizer_args
+    return OPTIMIZERS[name], kwargs
 
 
 def get_criterion(config):
     name = config["train"]["criterion"]["name"]
     assert name in CRITERIA, f"Criterion not found in {CRITERIA.keys()}"
-    args = config["train"]["criterion"]["args"]
-    args = args if args is not None else {}
+    kwargs = config["train"]["criterion"]["args"]
+    kwargs = kwargs if kwargs is not None else {}
 
-    return CRITERIA[name], args
+    return CRITERIA[name], kwargs
