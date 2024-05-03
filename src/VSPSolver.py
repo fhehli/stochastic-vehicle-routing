@@ -35,7 +35,7 @@ class VSPSolver:
         model.update()
 
         # Set objective
-        model.setObjective(sum([t * v for t, v in zip(theta, model.getVars())]), GRB.MINIMIZE)
+        model.setObjective(quicksum(t * v for t, v in zip(theta, model.getVars())), GRB.MINIMIZE)
 
         # Optimize model
         model.optimize()
