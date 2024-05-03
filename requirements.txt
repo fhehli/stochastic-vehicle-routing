@@ -5,4 +5,5 @@ torch==2.2.2
 torchvision==0.17.2
 gurobipy==11.0.1
 ruff==0.3.5
+tqdm==4.66.2
 -e .
