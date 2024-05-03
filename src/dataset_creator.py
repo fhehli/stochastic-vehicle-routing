@@ -16,7 +16,7 @@ def main(args):
         graphs.append(graph)
 
     with open(args.out_file, "wb") as out_file:
-        data = {"X": np.array(X), "Y": np.array(Y), "graphs": graphs, "args": vars(args)}
+        data = {"X": X, "Y": Y, "graphs": graphs, "args": vars(args)}
         pickle.dump(data, out_file)
 
 
@@ -29,7 +29,6 @@ def create_datapoint(args):
         n_districts_y=N_DISTRICTS_Y,
         n_tasks=args.n_tasks,
         n_scenarios=args.n_scenarios,
-        seed=args.seed,
     )
     city.create_graph()
 
@@ -54,4 +53,5 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=0, help="RNG seed.")
 
     args = parser.parse_args()
+    np.random.seed(args.seed)
     main(args)
