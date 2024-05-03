@@ -1,5 +1,10 @@
 from functools import partial
+from pathlib import Path
+
+import numpy as np
 import torch
+from tqdm.auto import tqdm
+
 from src.VSPSolver import solve_vsp
 from src.utils import get_model, get_criterion, get_optimizer, get_dataloaders
 
@@ -25,26 +30,64 @@ class Trainer:
         self.save_dir.mkdir(parents=True, exist_ok=True)
 
     def compute_metrics(self, i):
-        pass
+        if i % self.eval_every != 0:
+            return
+        losses = []
+        self.model.eval()
+        with torch.no_grad():
+            for inputs, labels, graph in self.val_loader:
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
+
+                theta = self.model(inputs)
+                func = partial(solve_vsp, graph=graph)
+                criterion = self.criterion(func)
+                loss = criterion(theta, labels).mean()
+                losses.append(loss.item())
+
+        print(f"Validation loss: {np.mean(losses):.3f}")
 
     def save_model(self, i):
-        pass
+        if i % self.save_every == 0 and i > 0:
+            torch.save(self.model.state_dict(), self.save_dir / f"epoch{i}.pt")
 
     def train_epoch(self, i):
         self.model.train()
-        for inputs, labels, graph in self.train_loader:
+        losses = []
+        for inputs, labels, graph in tqdm(self.train_loader, desc=f"Epoch {i}"):
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
+
             self.optimizer.zero_grad()
             theta = self.model(inputs)
+
             func = partial(solve_vsp, graph=graph)
             criterion = self.criterion(func)
             loss = criterion(theta, labels)
+            losses.append(loss.item())
+
             loss.backward()
             self.optimizer.step()
+
+        print(f"Train loss: {np.mean(losses):.3f}")
 
     def train(self):
         for i in range(self.n_epochs):
             self.train_epoch(i)
             self.compute_metrics(i)
             self.save_model(i)
+
+    def test(self):
+        self.model.eval()
+        losses = []
+        with torch.no_grad():
+            for inputs, labels, graph in tqdm(self.test_loader):
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
+                theta = self.model(inputs)
+                func = partial(solve_vsp, graph=graph)
+                criterion = self.criterion(func)
+                loss = criterion(theta, labels)
+                losses.append(loss.item())
+
+        print(f"Test loss: {np.mean(losses):.3f}")

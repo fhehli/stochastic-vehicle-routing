@@ -13,6 +13,7 @@ def main(args):
 
     trainer = Trainer(config)
     trainer.train()
+    trainer.test()
 
 
 if __name__ == "__main__":
