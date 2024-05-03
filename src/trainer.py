@@ -1,4 +1,6 @@
+from functools import partial
 import torch
+from src.VSPSolver import solve_vsp
 from src.utils import get_model, get_criterion, get_optimizer, get_dataloaders
 
 
@@ -34,8 +36,10 @@ class Trainer:
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
             self.optimizer.zero_grad()
-            outputs = self.model(inputs, graph)
-            loss = self.criterion(outputs, labels).mean()
+            theta = self.model(inputs)
+            func = partial(solve_vsp, graph=graph)
+            criterion = self.criterion(func)
+            loss = criterion(theta, labels)
             loss.backward()
             self.optimizer.step()
 
