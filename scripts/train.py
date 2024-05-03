@@ -5,22 +5,13 @@ import torch
 import yaml
 
 from src.trainer import Trainer
-from src.utils import get_model, get_criterion, get_optimizer, get_dataloaders
 
 
 def main(args):
     with open(args.config, "r") as file:
         config = yaml.safe_load(file)
 
-    model = get_model(config)
-    data_loaders = get_dataloaders(config)
-    optimizer_class, optimizer_kwargs = get_optimizer(config)
-    criterion_class, criterion_kwargs = get_criterion(config)
-
-    optimizer = optimizer_class(model.parameters(), **optimizer_kwargs)
-    criterion = criterion_class(func=model, **criterion_kwargs)
-
-    trainer = Trainer(model, data_loaders, optimizer, criterion, config)
+    trainer = Trainer(config)
     trainer.train()
 
 
