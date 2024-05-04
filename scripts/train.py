@@ -5,20 +5,15 @@ import torch
 import yaml
 
 from src.trainer import Trainer
-from src.utils import get_model, get_criterion, get_optimizer, get_data_loaders
 
 
 def main(args):
     with open(args.config, "r") as file:
         config = yaml.safe_load(file)
 
-    model = get_model(config)
-    data_loaders = get_data_loaders(config)
-    optimizer = get_optimizer(config)
-    criterion = get_criterion(config)
-
-    trainer = Trainer(model, data_loaders, optimizer, criterion, config)
+    trainer = Trainer(config)
     trainer.train()
+    trainer.test()
 
 
 if __name__ == "__main__":
