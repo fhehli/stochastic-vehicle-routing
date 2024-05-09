@@ -27,3 +27,4 @@ model:
   name: "FenchelYoungGLM"
   args:
     n_features: 20
+  maximize: False
