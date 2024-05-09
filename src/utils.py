@@ -1,12 +1,13 @@
 import pickle
-from typing import List, Tuple
+from typing import List, Tuple, Union
+
 
 import numpy as np
 import torch.nn as nn
 from torch.optim import AdamW, Optimizer
 from torch.utils.data import DataLoader, Dataset, random_split
 
-from src.city import SimpleDirectedGraph
+from src.city import SimpleDirectedGraph, City
 from src.models import FenchelYoungGLM
 from src.perturbations.fenchel_young import FenchelYoungLoss
 
@@ -20,18 +21,19 @@ CRITERIA = {
     "FenchelYoungLoss": FenchelYoungLoss,
 }
 
+DATA_INSTANCE = Union[SimpleDirectedGraph, City]
 
 class CitiesDataset(Dataset):
-    def __init__(self, X, Y, graphs):
+    def __init__(self, X, Y, instances):
         self.X: np.ndarray = X
         self.Y: np.ndarray = Y
-        self.graphs: List[SimpleDirectedGraph] = graphs
+        self.instances: List[DATA_INSTANCE] = instances
 
     def __len__(self):
         return len(self.X)
 
     def __getitem__(self, idx: int) -> Tuple[np.ndarray, np.ndarray, SimpleDirectedGraph]:
-        return self.X[idx], self.Y[idx], self.graphs[idx]
+        return self.X[idx], self.Y[idx], self.instances[idx]
 
 
 def get_model(config, device) -> nn.Module:
@@ -50,9 +52,10 @@ def get_dataloaders(config):
         data = pickle.load(file)
         X = data["X"]
         Y = data["Y"]
-        graphs = data["graphs"]
+        print(config["data"]["city"])
+        instances = data["cities"] if config["data"]["city"] else data["graphs"]
 
-    dataset = CitiesDataset(X, Y, graphs)
+    dataset = CitiesDataset(X, Y, instances)
     split = config["data"]["split"]
     train_size, val_size, test_size = split["train"], split["val"], split["test"]
     train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])

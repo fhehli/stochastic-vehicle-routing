@@ -28,6 +28,7 @@ class Trainer:
         self.save_every = config["train"]["save_every_n_epochs"]
         self.save_dir = Path(config["train"]["save_dir"])
         self.save_dir.mkdir(parents=True, exist_ok=True)
+        self.with_city = config["data"]["city"]
 
     def compute_metrics(self, i):
         if i % self.eval_every != 0:
@@ -35,7 +36,8 @@ class Trainer:
         losses = []
         self.model.eval()
         with torch.no_grad():
-            for inputs, labels, graph in self.val_loader:
+            for inputs, labels, instance in self.val_loader:
+                graph = instance.graph if self.with_city else instance
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
 
@@ -54,7 +56,8 @@ class Trainer:
     def train_epoch(self, i):
         self.model.train()
         losses = []
-        for inputs, labels, graph in tqdm(self.train_loader, desc=f"Epoch {i}"):
+        for inputs, labels, instance in tqdm(self.train_loader, desc=f"Epoch {i}"):
+            graph = instance.graph if self.with_city else instance
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
 
@@ -81,7 +84,8 @@ class Trainer:
         self.model.eval()
         losses = []
         with torch.no_grad():
-            for inputs, labels, graph in tqdm(self.test_loader):
+            for inputs, labels, instance in tqdm(self.test_loader):
+                graph = instance.graph if self.with_city else instance
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
                 theta = self.model(inputs)
