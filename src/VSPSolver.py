@@ -37,6 +37,9 @@ def solve_vsp(thetas, graph):
         # Set objective
         model.setObjective(quicksum(t * v for t, v in zip(theta, model.getVars())), GRB.MINIMIZE)
 
+        # Clear the previous solution
+        model.reset(clearall=0)
+
         # Optimize model
         model.optimize()
 

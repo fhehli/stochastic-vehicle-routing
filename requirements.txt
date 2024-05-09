@@ -9,3 +9,5 @@ absl==0.0
 matplotlib==3.8.4
 networkx==3.3
 PyYAML==6.0.1
+tqdm==4.66.2
+-e .

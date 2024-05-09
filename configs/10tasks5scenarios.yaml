@@ -9,6 +9,7 @@ train:
     name: "FenchelYoungLoss"
     args:
       batched: False
+      maximize: False
   batch_size: 1
   metrics:
     train_and_validation:
