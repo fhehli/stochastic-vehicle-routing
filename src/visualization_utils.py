@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
+from matplotlib.figure import Figure
 
 from src.city import *
 from src.constants import *
@@ -53,7 +54,7 @@ def get_path_type(u: int, v: int, start_and_end_id: list[int], n_ids: int) -> st
         raise Exception("u and v are not in the correct range")
     
 
-def plot_city_edges(city: City, E: list[Edge], ax: Axes, title: str):
+def plot_city_edges(city: City, E: list[Edge], ax: Axes, title: str, tasks_only: bool):
     # get props
     task_start_positions = city.positions_start
     task_end_positions = city.positions_end
@@ -70,25 +71,26 @@ def plot_city_edges(city: City, E: list[Edge], ax: Axes, title: str):
     ax.scatter(end_x, end_y, s=50, color='k', marker='X')
     ax.plot(*city.get_center(), "ks", markersize=10)
 
-    # draw arrows between tasks 
-    for e in E:
-        u = int(e.from_vertex.name)
-        v = int(e.to_vertex.name)
-        path_type = get_path_type(u, v, [start_task_id, end_task_id], n_tasks +2)
-        args = styles[path_type]
-
-        ux, uy = task_end_positions[u]
-        vx, vy = task_start_positions[v]
-        dx = vx - ux
-        dy = vy - uy
-        ax.arrow(ux, uy, dx, dy, head_width=0.5, length_includes_head=True, **args)
-
     # draw arrows from task starts to task ends
     for n in range(n_tasks + 2):
         dx = end_x[n] - start_x[n]
         dy = end_y[n] - start_y[n]
         args = styles["type3"]
         ax.arrow(start_x[n], start_y[n], dx, dy, head_width=0.3, length_includes_head=True, **args)
+
+    # draw arrows between tasks 
+    if not tasks_only:
+        for e in E:
+            u = int(e.from_vertex.name)
+            v = int(e.to_vertex.name)
+            path_type = get_path_type(u, v, [start_task_id, end_task_id], n_tasks +2)
+            args = styles[path_type]
+
+            ux, uy = task_end_positions[u]
+            vx, vy = task_start_positions[v]
+            dx = vx - ux
+            dy = vy - uy
+            ax.arrow(ux, uy, dx, dy, head_width=0.5, length_includes_head=True, **args)
 
     # set axis props
     ax.set_xlim(-5, city.width + 5)
@@ -102,12 +104,16 @@ def plot_city_edges(city: City, E: list[Edge], ax: Axes, title: str):
     ax.grid(True)
     
 
-def visualize_paths(city: City, vsp_path: list[int] = None, title: str = "Paths"):
+def visualize_paths(city: City, vsp_path: list[int] = None, title: str = "Paths", tasks_only: bool = False) -> Figure:
     """
     Visualizes every reachable path of the city
 
     @param city -- The City class to visualize.
     @param vsp_path --  The solution path of the SVSP instance. Will not show if none is provided.
+    @param title -- The title of the plot
+    @param tasks_only -- Visualize only the paths between task starts and ends
+
+    @returns 
 
     Example usage:
     
@@ -134,12 +140,12 @@ def visualize_paths(city: City, vsp_path: list[int] = None, title: str = "Paths"
     if vsp_path is not None:
         # Create a figure with two subplots arranged horizontally
         fig, (ax, ax_vsp) = plt.subplots(1, 2, figsize=(40, 15))
-        plot_city_edges(city, E, ax, title="tasks")
-        plot_city_edges(city, E_vsp, ax_vsp, title="solution")
+        plot_city_edges(city, E, ax, title="tasks", tasks_only=tasks_only)
+        plot_city_edges(city, E_vsp, ax_vsp, title="solution", tasks_only=tasks_only)
     else:
         fig = plt.figure(figsize=(20, 15))
         ax = fig.add_subplot(111)
-        plot_city_edges(city, E, ax, title="tasks")
+        plot_city_edges(city, E, ax, title="tasks", tasks_only=tasks_only)
 
     # labels and axis props
     plt.gca().set_aspect('equal')
@@ -147,8 +153,7 @@ def visualize_paths(city: City, vsp_path: list[int] = None, title: str = "Paths"
     plt.ylabel('Y Position')
     plt.title(title)
     
-    # Show plot
-    plt.show()
+    return plt.gcf()
 
 
 def visualize_tasks(city: City, 
