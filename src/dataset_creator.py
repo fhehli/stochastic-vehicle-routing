@@ -54,7 +54,8 @@ def main(args):
         if args.city:
             data = {"X": X, "Y": Y, "cities": cities, "args": vars(args)}
         else:
-            data = {"X": X, "Y": Y, "graphs": cities.map(lambda city: city.graph), "args": vars(args)}
+            graphs = list(map(lambda city: city.graph, cities))
+            data = {"X": X, "Y": Y, "graphs": graphs, "args": vars(args)}
         pickle.dump(data, out_file)
 
 

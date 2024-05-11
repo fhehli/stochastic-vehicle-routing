@@ -1,6 +1,6 @@
 data:
   path: "data/test.pkl"
-  city: True
+  city: False
   split:
     train: .34
     val: .33
