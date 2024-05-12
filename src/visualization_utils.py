@@ -157,9 +157,9 @@ def visualize_paths(city: City, vsp_path: list[int] = None, title: str = "Paths"
 
 
 def visualize_tasks(city: City, 
-                    show_heatmap: bool = False, 
                     vsp_path: list = None, 
-                    show_reachable_paths: bool = False):
+                    show_heatmap: bool = False, 
+                    show_reachable_paths: bool = False) -> Figure:
     """
     Plots every (task start -> task end) of the given city instance on the city map including the center
 
@@ -178,14 +178,16 @@ def visualize_tasks(city: City,
         city = City(CITY_HEIGHT_MINUTES, CITY_WIDTH_MINUTES, N_DISTRICTS_X, N_DISTRICTS_Y, N_TASKS, N_SCENARIOS)
         visualize_tasks(city)
     """
-    task_start_positions = city.positions_start[:-2]
-    task_end_positions = city.positions_end[:-2]
+    G = city.graph
+    E = list(G.get_edges())
+    task_start_positions = city.positions_start
+    task_end_positions = city.positions_end
     n_tasks = city.n_tasks
     inter_scenario_delays = city.scenario_delays_inter
 
-    # Unzip start and end positions
-    start_x, start_y = zip(*task_start_positions)
-    end_x, end_y = zip(*task_end_positions)
+    # Unzip job task start and end positions
+    start_x, start_y = zip(*task_start_positions[:-2])
+    end_x, end_y = zip(*task_end_positions[:-2])
     
     # colors
     cm = plt.get_cmap('gist_rainbow')
@@ -204,13 +206,22 @@ def visualize_tasks(city: City,
     ax.plot(*city.get_center(), "ks", markersize=10)
 
     # draw arrows
-    for start, end, color in zip(task_start_positions, task_end_positions, colors):
-        dx = end[0] - start[0]
-        dy = end[1] - start[1]
-        ax.arrow(start[0], start[1], dx, dy, color=color, head_width=0.3, length_includes_head=True)
+    for i in range(n_tasks):
+        dx = end_x[i] - start_x[i]
+        dy = end_y[i] - start_y[i]
+        ax.arrow(start_x[i], start_y[i], dx, dy, color=colors[i], head_width=0.3, length_includes_head=True)
+
+    if vsp_path is not None:
+        E_vsp = [E[n] for n in range(len(vsp_path)) if vsp_path[n] == 1]
+        for e in E_vsp:
+            start = task_start_positions[int(e.from_vertex.name)]
+            end = task_end_positions[int(e.to_vertex.name)]
+            dx = end[0] - start[0]
+            dy = end[1] - start[1]
+            ax.arrow(start[0], start[1], dx, dy, color="black", head_width=0.3, length_includes_head=True)
 
     # labels and axis props
-    ax.legend()
+    # ax.legend()
     ax.set_xlim(-5, city.width + 5)
     ax.set_ylim(-5, city.height + 5)
     plt.gca().set_aspect('equal')
@@ -218,9 +229,9 @@ def visualize_tasks(city: City,
     plt.xlabel('X Position')
     plt.ylabel('Y Position')
     
-    # Show plot
+    # get plot
     plt.grid(True)
-    plt.show()
+    return plt.gcf()
 
 
 def visualize_tasks_nx():
