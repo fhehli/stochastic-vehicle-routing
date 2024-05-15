@@ -51,6 +51,9 @@ class Trainer:
         if i % self.save_every == 0 and i > 0:
             torch.save(self.model.state_dict(), self.save_dir / f"epoch{i}.pt")
 
+    def load_model(self, path):
+        self.model.load_state_dict(torch.load(path))
+
     def train_epoch(self, i):
         self.model.train()
         losses = []
