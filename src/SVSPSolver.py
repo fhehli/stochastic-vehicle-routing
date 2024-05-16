@@ -99,7 +99,7 @@ class SVSPSolver:
             + self.city.vehicle_cost
             * quicksum(
                 self.model.getVarByName(e.name)
-                for e in self.city.graph.get_incoming_edges(self.city.graph.get_source())
+                for e in self.city.graph.get_outgoing_edges(self.city.graph.get_source())
             ),
             GRB.MINIMIZE,
         )
