@@ -99,6 +99,17 @@ class SimpleDirectedGraph:
             len(vertices) == 0 and len(edges) > 0
         ), "edges exists but there are no vertices in the graph yet"  # no ghost edges
 
+    def get_num_vehicles(self, solution: np.ndarray) -> int:
+        num_vehicles = 0
+        for i, e in enumerate(self.get_edges()):
+            if e.from_vertex == self.get_source() and solution[i] == 1:
+                num_vehicles += 1
+        return num_vehicles
+
+    def is_trivial(self, solution: np.ndarray) -> bool:
+        num_vehicles = self.get_num_vehicles(solution)
+        return num_vehicles == 1 or num_vehicles == len(self.get_vertices()) - 2
+
 
 class City:
     def __init__(
