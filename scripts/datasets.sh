@@ -1,1 +1,1 @@
-python src/dataset_creator.py --n_samples 150 --out_file "data/10tasks5scenarios.pkl"
+python src/dataset_creator.py --n_samples 50 --n_tasks 25 --n_scenarios 10  --city --out_file "data/paper_config.pkl"
