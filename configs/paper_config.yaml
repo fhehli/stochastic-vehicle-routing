@@ -1,5 +1,5 @@
 data:
-  path: "data/test.pkl"
+  path: "data/paper_config.pkl"
   city: True
   split:
     train: .34
@@ -23,7 +23,7 @@ train:
     args:
   n_epochs: 200
   save_every_n_epochs: 50
-  save_dir: "models/10tasks5scenarios"
+  save_dir: "models/paper_config"
   eval_every_n_epochs: 1
 model:
   name: "FenchelYoungGLM"
