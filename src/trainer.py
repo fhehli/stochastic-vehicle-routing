@@ -33,10 +33,10 @@ class Trainer:
     def compute_metrics(self, i):
         if i % self.eval_every != 0:
             return
-        losses = []
+        losses, percentage_from_opt = [], []
         self.model.eval()
         with torch.no_grad():
-            for inputs, labels, instance in self.val_loader:
+            for inputs, labels, instance in tqdm(self.val_loader, desc=f"Validation epoch {i}"):
                 graph = instance.graph if self.with_city else instance
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
@@ -47,7 +47,16 @@ class Trainer:
                 loss = criterion(theta, labels).mean()
                 losses.append(loss.item())
 
+                if self.with_city:
+                    solution = solve_vsp(theta.unsqueeze(0), graph)
+                    cost = instance.compute_solution_cost(solution.squeeze())
+                    opt_cost = instance.compute_solution_cost(labels)
+                    percentage_from_opt.append(cost / opt_cost - 1.0)
+
         print(f"Validation loss: {np.mean(losses):.3f}")
+        if self.with_city:
+            print(f"Percentage from optimal: {np.mean(percentage_from_opt):.3f}")
+        return losses
 
     def save_model(self, i):
         if i % self.save_every == 0 and i > 0:
@@ -59,7 +68,7 @@ class Trainer:
     def train_epoch(self, i):
         self.model.train()
         losses = []
-        for inputs, labels, instance in tqdm(self.train_loader, desc=f"Epoch {i}"):
+        for inputs, labels, instance in tqdm(self.train_loader, desc=f"Train epoch {i}"):
             graph = instance.graph if self.with_city else instance
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
@@ -78,7 +87,7 @@ class Trainer:
         print(f"Train loss: {np.mean(losses):.3f}")
 
     def train(self):
-        for i in range(self.n_epochs):
+        for i in range(1, self.n_epochs + 1):
             self.train_epoch(i)
             self.compute_metrics(i)
             self.save_model(i)
@@ -98,3 +107,11 @@ class Trainer:
                 losses.append(loss.item())
 
         print(f"Test loss: {np.mean(losses):.3f}")
+
+    def predict(self, inputs, graph):
+        self.model.eval()
+        with torch.no_grad():
+            inputs = inputs.to(self.device)
+            theta = self.model(inputs)
+            solution = solve_vsp(theta.unsqueeze(0), graph)
+        return solution.squeeze()
