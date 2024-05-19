@@ -3,7 +3,6 @@ import numpy as np
 from src.constants import *
 
 
-
 class Vertex:
     def __init__(self, name, **kwargs) -> None:
         self.name = str(name)
@@ -166,7 +165,7 @@ class City:
         assert self.position_valid(x, y), f"Position ({x}, {y}) is not within the city boundaries"
         # Returns the district number of the district at position (x, y)
         return int(y / self.height * self.n_districts_y) * self.n_districts_x + int(x / self.width * self.n_districts_x)
-    
+
     def get_center(self) -> tuple:
         return (self.width / 2, self.height / 2)
 
@@ -425,6 +424,41 @@ class City:
 
     def compute_delays(self):
         return self.scenario_end_times - self.end_times
+
+    def compute_solution_cost(self, solution: np.ndarray) -> float:
+        edges = list(self.graph.get_edges())
+
+        visited = np.zeros((self.n_scenarios, self.n_tasks + 2))
+
+        for scenario in range(self.n_scenarios):
+            visited[scenario, self.n_tasks] = 1
+
+        obj_delays = np.zeros((self.n_scenarios, self.n_tasks + 2))
+        delays = self.compute_delays()
+        slacks = self.compute_slacks_for_instance()
+
+        def visit(task: int, prev_task: int, scenario: int):
+            if visited[scenario, task] == 1:
+                return
+
+            visited[scenario, task] = 1
+
+            obj_delays[scenario, task] = delays[scenario, task] + max(
+                0, obj_delays[scenario, prev_task] - slacks[prev_task, task, scenario]
+            )
+
+            for e in self.graph.get_outgoing_edges(Vertex(name=task)):
+                if solution[edges.index(e)] == 1:
+                    visit(int(e.to_vertex.name), task, scenario)
+
+        for scenario in range(self.n_scenarios):
+            for e in self.graph.get_outgoing_edges(self.graph.get_source()):
+                if solution[edges.index(e)] == 1:
+                    visit(int(e.to_vertex.name), self.n_tasks, scenario)
+
+        return self.delay_cost * np.mean(
+            np.sum(obj_delays[:, :-2], axis=-1)
+        ) + self.vehicle_cost * self.graph.get_num_vehicles(solution)
 
     @staticmethod
     def get_hour(minutes: float) -> int:

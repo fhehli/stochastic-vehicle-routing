@@ -10,12 +10,12 @@ from src.constants import *
 def str2bool(v):
     if isinstance(v, bool):
         return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+    if v.lower() in ("yes", "true", "t", "y", "1"):
         return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+    elif v.lower() in ("no", "false", "f", "n", "0"):
         return False
     else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+        raise argparse.ArgumentTypeError("Boolean value expected.")
 
 
 def create_datapoint(args):
@@ -49,7 +49,7 @@ def main(args):
         X.append(x)
         Y.append(y)
         cities.append(city)
-    
+
     with open(args.out_file, "wb") as out_file:
         if args.city:
             data = {"X": X, "Y": Y, "cities": cities, "args": vars(args)}
@@ -64,7 +64,14 @@ if __name__ == "__main__":
     parser.add_argument("--n_samples", type=int, default=1, help="Number of samples to generate.")
     parser.add_argument("--n_scenarios", type=int, default=N_SCENARIOS, help="Number of scenarios.")
     parser.add_argument("--n_tasks", type=int, default=N_TASKS, help="Number of tasks.")
-    parser.add_argument("--city", type=str2bool, nargs='?', const=True, default=False, help="Dump the city instance related to the sample")
+    parser.add_argument(
+        "--city",
+        type=str2bool,
+        nargs="?",
+        const=True,
+        default=False,
+        help="Dump the city instance related to the sample",
+    )
     parser.add_argument("--out_file", type=str, default="data/test.pkl", help="Path to the output file")
     parser.add_argument("--seed", type=int, default=0, help="RNG seed.")
 
