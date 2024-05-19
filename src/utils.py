@@ -1,5 +1,6 @@
 import pickle
 from typing import List, Tuple, Union
+from pathlib import Path
 
 
 import numpy as np
@@ -22,6 +23,7 @@ CRITERIA = {
 }
 
 DATA_INSTANCE = Union[SimpleDirectedGraph, City]
+
 
 class CitiesDataset(Dataset):
     def __init__(self, X, Y, instances):
@@ -47,12 +49,13 @@ def get_model(config, device) -> nn.Module:
     return model
 
 
-def get_dataloaders(config):
-    with open(config["data"]["path"], "rb") as file:
+def get_dataloaders(config) -> Tuple[DataLoader, DataLoader, DataLoader]:
+    # We need this for hyperparameter search, since ray.tune changes the current working directory
+    abs_path = Path(__file__).parent.parent / config["data"]["path"]
+    with open(abs_path, "rb") as file:
         data = pickle.load(file)
         X = data["X"]
         Y = data["Y"]
-        print(config["data"]["city"])
         instances = data["cities"] if config["data"]["city"] else data["graphs"]
 
     dataset = CitiesDataset(X, Y, instances)
