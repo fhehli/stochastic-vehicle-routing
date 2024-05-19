@@ -78,7 +78,8 @@ class SVSPSolver:
         for s, e in product(range(self.city.n_scenarios), self.city.graph.get_edges()):
             self.model.addConstr(
                 self.model.getVarByName(f"yd({e.name},{s})")
-                >= delays[s, int(e.from_vertex.name)] + max_delay * (self.model.getVarByName(e.name) - 1)
+                >= self.model.getVarByName(f"d({e.from_vertex.name},{s})")
+                + max_delay * (self.model.getVarByName(e.name) - 1)
             )
             self.model.addConstr(
                 self.model.getVarByName(f"yd({e.name},{s})") <= max_delay * self.model.getVarByName(e.name)
