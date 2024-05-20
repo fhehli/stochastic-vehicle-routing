@@ -34,7 +34,10 @@ def create_datapoint(args):
     solver = SVSPSolver(city)
 
     # Compute the features used for training the GLM
-    glm_features = city.compute_features()  # Matrix of features of size (20, nb_edges)
+    if args.neighbour_features:
+        glm_features = city.compute_features_neighbours()  # Matrix of features of size (nb_edges, 180)
+    else:
+        glm_features = city.compute_features()  # Matrix of features of size (nb_edges, 20)
 
     # Compute the solution (supervised dataset)
     solution = solver.solve()  # Array with length
@@ -74,6 +77,9 @@ if __name__ == "__main__":
     )
     parser.add_argument("--out_file", type=str, default="data/test.pkl", help="Path to the output file")
     parser.add_argument("--seed", type=int, default=0, help="RNG seed.")
+    parser.add_argument(
+        "--neighbour_features", type=str2bool, nargs="?", const=True, default=False, help="Use neighbour features"
+    )
 
     args = parser.parse_args()
     np.random.seed(args.seed)
