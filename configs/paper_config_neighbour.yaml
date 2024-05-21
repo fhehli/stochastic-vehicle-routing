@@ -23,7 +23,7 @@ train:
     args:
   n_epochs: 200
   save_every_n_epochs: 50
-  save_dir: "models/paper_config"
+  save_dir: "models/paper_config_neighbour"
   eval_every_n_epochs: 1
 model:
   name: "FenchelYoungGLM"
