@@ -1,5 +1,4 @@
 import torch.nn as nn
-from torch.nn.functional import normalize
 
 
 class FenchelYoungGLM(nn.Module):
@@ -9,8 +8,7 @@ class FenchelYoungGLM(nn.Module):
 
     def forward(self, features):
         features = features.to(self.encoder.weight.data.dtype)
-        normalized_features = normalize(features)
-        theta = self.encoder(normalized_features)
+        theta = self.encoder(features)
         theta = theta.squeeze(-1)
 
         return theta
