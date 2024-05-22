@@ -1,3 +1,4 @@
+#  Stochastic Vehicle Routing
 ## Visually debugging the solution of the model
 This branch provides a visual debugger (`visual_debugger.ipynb`) to compare the solution of the model with the ground truth.
 
