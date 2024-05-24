@@ -1,5 +1,6 @@
 from functools import partial
 from pathlib import Path
+import pickle
 
 import numpy as np
 import torch
@@ -72,7 +73,7 @@ class Trainer:
         print(f"Validation loss: {np.mean(losses):.3f}")
         if self.with_city:
             print(f"Percentage from optimal: {np.mean(percentage_from_opt) * 100:.3f}%")
-        return losses
+        return np.mean(losses), np.mean(percentage_from_opt)
 
     def save_model(self, i):
         if i % self.save_every == 0 and i > 0:
@@ -83,7 +84,7 @@ class Trainer:
 
     def train_epoch(self, i):
         self.model.train()
-        losses = []
+        losses, percentage_from_opt = [], []
         for inputs, labels, instance in tqdm(self.train_loader, desc=f"Train epoch {i}"):
             graph = instance.graph if self.with_city else instance
             inputs = inputs.to(self.device)
@@ -97,16 +98,43 @@ class Trainer:
             loss = criterion(theta, labels)
             losses.append(loss.item())
 
+            with torch.no_grad():
+                if self.with_city:
+                    solution = solve_vsp(theta.unsqueeze(0), graph)
+                    cost = instance.compute_solution_cost(solution.squeeze())
+                    opt_cost = instance.compute_solution_cost(labels)
+                    percentage_from_opt.append(cost / opt_cost - 1.0)
+
             loss.backward()
             self.optimizer.step()
 
         print(f"Train loss: {np.mean(losses):.3f}")
 
+        return np.mean(losses), np.mean(percentage_from_opt)
+
     def train(self):
+        train_losses, train_cost_gaps, valid_losses, valid_cost_gaps = [], [], [], []
+
         for i in range(1, self.n_epochs + 1):
-            self.train_epoch(i)
-            self.compute_metrics(i)
+            train_loss, train_cost_gap = self.train_epoch(i)
+            valid_loss, valid_cost_gap = self.compute_metrics(i)
+
+            train_losses.append(train_loss)
+            train_cost_gaps.append(train_cost_gap)
+            valid_losses.append(valid_loss)
+            valid_cost_gaps.append(valid_cost_gap)
+
             self.save_model(i)
+
+        pickle.dump(
+            {
+                "train_losses": train_losses,
+                "train_cost_gaps": train_cost_gaps,
+                "valid_losses": valid_losses,
+                "valid_cost_gaps": valid_cost_gaps,
+            },
+            open(self.save_dir / "metrics.pkl", "wb"),
+        )
 
     def test(self):
         self.model.eval()
