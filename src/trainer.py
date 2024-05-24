@@ -30,6 +30,22 @@ class Trainer:
         self.save_dir.mkdir(parents=True, exist_ok=True)
         self.with_city = config["data"]["city"]
 
+    def compute_baseline(self):
+        baselines = []
+        self.model.eval()
+        with torch.no_grad():
+            for inputs, labels, instance in self.val_loader:
+                graph = instance.graph if self.with_city else instance
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
+
+                opt_cost = instance.compute_solution_cost(labels)
+                baseline = solve_vsp(inputs[:, 0].unsqueeze(0), graph)
+                baseline_cost = instance.compute_solution_cost(baseline.squeeze())
+                baseline_percentage = baseline_cost / opt_cost - 1.0
+                baselines.append(baseline_percentage)
+        print(f"Baseline: {np.mean(baselines):.3f}")
+
     def compute_metrics(self, i):
         if i % self.eval_every != 0:
             return
@@ -55,7 +71,7 @@ class Trainer:
 
         print(f"Validation loss: {np.mean(losses):.3f}")
         if self.with_city:
-            print(f"Percentage from optimal: {np.mean(percentage_from_opt):.3f}")
+            print(f"Percentage from optimal: {np.mean(percentage_from_opt) * 100:.3f}%")
         return losses
 
     def save_model(self, i):
