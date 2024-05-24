@@ -9,11 +9,12 @@ from torch.optim import AdamW, Optimizer
 from torch.utils.data import DataLoader, Dataset, random_split
 
 from src.city import SimpleDirectedGraph, City
-from src.models import FenchelYoungGLM
+from src.models import FenchelYoungGLM, MLP
 from src.perturbations.fenchel_young import FenchelYoungLoss
 
 MODELS = {
     "FenchelYoungGLM": FenchelYoungGLM,
+    "MLP": MLP,
 }
 OPTIMIZERS = {
     "AdamW": AdamW,
