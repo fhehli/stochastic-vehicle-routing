@@ -1,5 +1,6 @@
 import argparse
 import pickle
+import tqdm
 
 # This script can be used to create a training dataset
 from src.city import City
@@ -47,18 +48,32 @@ def create_datapoint(args):
 
 def main(args):
     X, Y, cities = [], [], []
-    for _ in range(args.n_samples):
+    for _ in tqdm.tqdm(range(args.n_samples)):
         x, y, city = create_datapoint(args)
+        print(x.shape)
         X.append(x)
         Y.append(y)
         cities.append(city)
 
+    mean_std = {}
+    if args.normalize_features:
+        X_stacked = np.vstack(X)
+
+        mean = np.mean(X_stacked, axis=0)
+        std = np.std(X_stacked, axis=0)
+        std[std == 0] = 1.0
+
+        for i in range(len(X)):
+            X[i] = (X[i] - mean) / std
+
+        mean_std = {"mean": mean, "std": std}
+
     with open(args.out_file, "wb") as out_file:
         if args.city:
-            data = {"X": X, "Y": Y, "cities": cities, "args": vars(args)}
+            data = {"X": X, "Y": Y, "cities": cities, "args": vars(args), **mean_std}
         else:
             graphs = list(map(lambda city: city.graph, cities))
-            data = {"X": X, "Y": Y, "graphs": graphs, "args": vars(args)}
+            data = {"X": X, "Y": Y, "graphs": graphs, "args": vars(args), **mean_std}
         pickle.dump(data, out_file)
 
 
@@ -79,6 +94,9 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=0, help="RNG seed.")
     parser.add_argument(
         "--neighbour_features", type=str2bool, nargs="?", const=True, default=False, help="Use neighbour features"
+    )
+    parser.add_argument(
+        "--normalize_features", type=str2bool, nargs="?", const=True, default=False, help="Normalize features"
     )
 
     args = parser.parse_args()
