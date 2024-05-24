@@ -1,0 +1,32 @@
+data:
+  path: "data/neighbour.pkl"
+  city: True
+  split:
+    train: .34
+    val: .33
+    test: .33
+train:
+  criterion:
+    name: "FenchelYoungLoss"
+    args:
+      batched: False
+      maximize: False
+      sigma: 0.1
+      num_samples: 20
+  batch_size: 1
+  metrics:
+    train_and_validation:
+    train:
+    validation:
+  optimizer:
+    name: "AdamW"
+    args:
+  n_epochs: 50
+  save_every_n_epochs: 5
+  save_dir: "models/mlp_neighbour"
+  eval_every_n_epochs: 1
+model:
+  name: "MLP"
+  args:
+    n_features: 180
+    hidden_size: 100
