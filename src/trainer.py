@@ -47,7 +47,11 @@ class Trainer:
                 baselines.append(baseline_percentage)
         print(f"Baseline: {np.mean(baselines):.3f}")
 
+<<<<<<< HEAD
     def compute_baseline_single_sample(self, inputs, instance) -> torch.Tensor:
+=======
+    def compute_baseline_single_sample(self, inputs, instance):
+>>>>>>> 8f1b9ec45fa0f590e3cfae0f046af2dc4fb7bee7
         inputs = inputs.to(self.device)
         baseline = solve_vsp(inputs[:, 0].unsqueeze(0), instance.graph)
         return baseline.squeeze()
