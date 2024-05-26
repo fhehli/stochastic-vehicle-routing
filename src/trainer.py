@@ -47,6 +47,11 @@ class Trainer:
                 baselines.append(baseline_percentage)
         print(f"Baseline: {np.mean(baselines):.3f}")
 
+    def compute_baseline_single_sample(self, inputs, instance):
+        inputs = inputs.to(self.device)
+        baseline = solve_vsp(inputs[:, 0].unsqueeze(0), instance.graph)
+        return baseline.squeeze()
+
     def compute_metrics(self, i):
         if i % self.eval_every != 0:
             return
