@@ -47,6 +47,11 @@ class Trainer:
                 baselines.append(baseline_percentage)
         print(f"Baseline: {np.mean(baselines):.3f}")
 
+    def compute_baseline_single_sample(self, inputs, instance) -> torch.Tensor:
+        inputs = inputs.to(self.device)
+        baseline = solve_vsp(inputs[:, 0].unsqueeze(0), instance.graph)
+        return baseline.squeeze()
+
     def compute_metrics(self, i):
         if i % self.eval_every != 0:
             return
@@ -152,10 +157,15 @@ class Trainer:
 
         print(f"Test loss: {np.mean(losses):.3f}")
 
-    def predict(self, inputs, graph):
+    def predict(self, inputs, graph) -> list[int]:
         self.model.eval()
         with torch.no_grad():
             inputs = inputs.to(self.device)
             theta = self.model(inputs)
             solution = solve_vsp(theta.unsqueeze(0), graph)
         return solution.squeeze()
+    
+    def get_one_instance(self):
+        with torch.no_grad():
+            inputs, labels, instance = next(iter(self.test_loader))
+        return inputs, labels, instance
