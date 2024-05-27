@@ -164,7 +164,7 @@ class Trainer:
             theta = self.model(inputs)
             solution = solve_vsp(theta.unsqueeze(0), graph)
         return solution.squeeze()
-    
+
     def get_one_instance(self):
         with torch.no_grad():
             inputs, labels, instance = next(iter(self.test_loader))
